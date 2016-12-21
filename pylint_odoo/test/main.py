@@ -184,9 +184,8 @@ class MainTest(unittest.TestCase):
         pylint_res = self.run_pylint(self.paths_modules)
         misc.which = which_original
         real_errors = pylint_res.linter.stats['by_msg']
-        expected_errors = EXPECTED_ERRORS.copy()
-        expected_errors.pop('javascript-lint')
-        self.assertEqual(expected_errors, real_errors)
+        self.expected_errors.pop('javascript-lint')
+        self.assertEqual(self.expected_errors, real_errors)
 
     def test_60_with_jslint_error(self):
         """Test with jslint error"""
@@ -204,9 +203,8 @@ class MainTest(unittest.TestCase):
         pylint_res = self.run_pylint(self.paths_modules)
         misc.which = which_original
         real_errors = pylint_res.linter.stats['by_msg']
-        expected_errors = EXPECTED_ERRORS.copy()
-        expected_errors.pop('javascript-lint')
-        self.assertEqual(expected_errors, real_errors)
+        self.expected_errors.pop('javascript-lint')
+        self.assertEqual(self.expected_errors, real_errors)
 
 
 if __name__ == '__main__':
