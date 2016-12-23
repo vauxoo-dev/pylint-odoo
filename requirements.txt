@@ -8,7 +8,7 @@ MarkupSafe==0.23
 babel==2.3.4
 imagesize==0.7.1
 jinja2==2.8
-git+https://github.com/Vauxoo/pylint@master#egg=pylint
+git+https://github.com/PyCQA/pylint.git@f83dd399#egg=pylint
 translate-toolkit==1.13.0
 polib==1.0.7
 whichcraft
