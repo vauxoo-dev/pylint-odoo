@@ -186,6 +186,11 @@ ODOO_MSGS = {
         'old-api7-method-defined',
         settings.DESC_DFLT
     ),
+    'W%d11' % settings.BASE_NOMODULE_ID: (
+        'Field parameter "%s" is no longer supported. Use "%s" instead.',
+        'renamed-field-parameter',
+        settings.DESC_DFLT
+    ),
 }
 
 
@@ -242,6 +247,10 @@ DFTL_ODOO_EXCEPTIONS = [
 DFTL_NO_MISSING_RETURN = [
     '__init__', 'setUp', 'tearDown',
 ]
+DFTL_DEPRECATED_FIELD_PARAMETERS = [
+    # From odoo/odoo 10.0: odoo/odoo/fields.py:29
+    'digits_compute:digits', 'select:index'
+]
 
 
 class NoModuleChecker(BaseChecker):
@@ -285,6 +294,19 @@ class NoModuleChecker(BaseChecker):
             'help': 'List of attributes deprecated, ' +
                     'separated by a comma.'
         }),
+        ('deprecated_field_parameters', {
+            'type': 'csv',
+            'metavar': '<comma separated values>',
+            'default': DFTL_DEPRECATED_FIELD_PARAMETERS,
+            'help': 'List of deprecated field parameters, separated by a '
+                    'comma. If the param was renamed, separate the old and '
+                    'new name with a colon. If the param was removed, keep '
+                    'the right side of the colon empty. '
+                    '"deprecated_param:" means that "deprecated_param" was '
+                    'deprecated and it doesn\'t have a new alternative. '
+                    '"deprecated_param:new_param" means that it was '
+                    'deprecated and renamed as "new_param". '
+        }),
         ('method_required_super', {
             'type': 'csv',
             'metavar': '<comma separated values>',
@@ -327,10 +349,33 @@ class NoModuleChecker(BaseChecker):
         }),
     )
 
+    def open(self):
+        super(NoModuleChecker, self).open()
+        self.config.deprecated_field_parameters = \
+            self.colon_list_to_dict(self.config.deprecated_field_parameters)
+
+    def colon_list_to_dict(self, colon_list):
+        """Converts a colon list to a dictionary.
+
+        :param colon_list: A list of strings representing keys and values,
+            separated with a colon. If a key doesn't have a value, keep the
+            right side of the colon empty.
+        :type colon_list: list
+        :returns: A dictionary with the values assigned to corresponding keys.
+        :rtype: dict
+
+        :Example:
+
+        >>> self.colon_list_to_dict(['colon:list', 'empty_key:'])
+        {'colon': 'list', 'empty_key': ''}
+        """
+        return dict([item.split(":") for item in colon_list])
+
     @utils.check_messages('translation-field', 'invalid-commit',
                           'method-compute', 'method-search', 'method-inverse',
                           'sql-injection', 'consider-add-field-help',
-                          'prefer-other-formatting'
+                          'prefer-other-formatting',
+                          'renamed-field-parameter'
                           )
     def visit_call(self, node):
         node_infer = utils.safe_infer(node.func)
@@ -359,6 +404,15 @@ class NoModuleChecker(BaseChecker):
                         # The argument "selection_add" is for overwrite field.
                         # Then don't need help.
                         has_help = None
+                    elif (argument.arg in
+                            self.config.deprecated_field_parameters):
+                        new_param = self.config.deprecated_field_parameters[
+                            argument.arg
+                        ]
+                        self.add_message(
+                            'renamed-field-parameter', node=node,
+                            args=(argument.arg, new_param)
+                        )
                 if isinstance(argument_aux, astroid.CallFunc) and \
                         isinstance(argument_aux.func, astroid.Name) and \
                         argument_aux.func.name == '_':

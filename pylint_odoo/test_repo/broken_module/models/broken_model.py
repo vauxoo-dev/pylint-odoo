@@ -49,6 +49,18 @@ class TestModel(models.Model):
         copy=True,
     )
 
+    my_ok_field = fields.Float(
+        digits=(6, 6),  # OK: Valid field parameter
+        index=True,  # OK: Valid field parameter
+        help="My ok field",
+    )
+
+    my_ko_field = fields.Float(
+        digits_compute=lambda cr: (6, 6),  # Deprecated field parameter
+        select=True,  # Deprecated field parameter
+        help="My ko field",
+    )
+
     # This is a inherit overwrite field then don't should show errors related
     # with creation of fields.
     field_state_overwrite = fields.Selection(
