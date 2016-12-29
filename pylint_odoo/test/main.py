@@ -56,6 +56,7 @@ EXPECTED_ERRORS = {
     'wrong-tabs-instead-of-spaces': 2,
     'xml-syntax-error': 2,
     'renamed-field-parameter': 2,
+    'attribute-string-redundant': 33,
 }
 
 
