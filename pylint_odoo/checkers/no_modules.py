@@ -197,7 +197,12 @@ ODOO_MSGS = {
         'String parameter equal to name of variable',
         'attribute-string-redundant',
         settings.DESC_DFLT
-    )
+    ),
+    'W%d13' % settings.BASE_NOMODULE_ID: (
+        '"eval" referenced detected.',
+        'eval-referenced',
+        settings.DESC_DFLT
+    ),
 }
 
 
@@ -604,6 +609,16 @@ class NoModuleChecker(BaseChecker):
             if node_left.name in self.config.attribute_deprecated:
                 self.add_message('attribute-deprecated',
                                  node=node_left, args=(node_left.name,))
+
+    @utils.check_messages('eval-referenced')
+    def visit_name(self, node):
+        """Detect when a "bad" built-in is referenced."""
+        node_infer = utils.safe_infer(node)
+        if not utils.is_builtin_object(node_infer):
+            # Skip not builtin objects
+            return
+        if node_infer.name == 'eval':
+            self.add_message('eval-referenced', node=node)
 
     def camelize(self, string):
         return re.sub(r"(?:^|_)(.)", lambda m: m.group(1).upper(), string)

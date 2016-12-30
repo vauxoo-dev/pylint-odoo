@@ -54,6 +54,7 @@ EXPECTED_ERRORS = {
     'translation-required': 4,
     'use-vim-comment': 1,
     'wrong-tabs-instead-of-spaces': 2,
+    'eval-referenced': 5,
     'xml-syntax-error': 2,
     'renamed-field-parameter': 2,
     'attribute-string-redundant': 33,
