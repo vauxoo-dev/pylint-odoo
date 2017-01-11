@@ -209,6 +209,27 @@ class MainTest(unittest.TestCase):
         self.expected_errors.pop('javascript-lint')
         self.assertEqual(self.expected_errors, real_errors)
 
+    def test_70_ignore(self):
+        """Test --ignore parameter """
+        extra_params = ['--ignore=test_module/res_users.xml',
+                        '--disable=all',
+                        '--enable=deprecated-openerp-xml-node']
+        pylint_res = self.run_pylint(self.paths_modules, extra_params)
+        real_errors = pylint_res.linter.stats['by_msg']
+        self.assertEqual(real_errors.items(),
+                         [('deprecated-openerp-xml-node', 4)])
+
+    def test_80_ignore_patternls(self):
+        """Test --ignore-patterns parameter """
+        extra_params = ['--ignore-patterns='
+                        '.*\/test_module\/*\/.*xml$',
+                        '--disable=all',
+                        '--enable=deprecated-openerp-xml-node']
+        pylint_res = self.run_pylint(self.paths_modules, extra_params)
+        real_errors = pylint_res.linter.stats['by_msg']
+        self.assertEqual(real_errors.items(),
+                         [('deprecated-openerp-xml-node', 3)])
+
 
 if __name__ == '__main__':
     unittest.main()
