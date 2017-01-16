@@ -58,6 +58,7 @@ EXPECTED_ERRORS = {
     'xml-syntax-error': 2,
     'renamed-field-parameter': 2,
     'attribute-string-redundant': 33,
+    'xml-attribute-translatable': 1,
 }
 
 
