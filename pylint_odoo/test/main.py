@@ -2,12 +2,14 @@
 import os
 import stat
 import sys
+from tempfile import gettempdir
+
 import unittest
 from contextlib import contextmanager
 from cProfile import Profile
-from tempfile import gettempdir
 
 from pylint.lint import Run
+
 from pylint_odoo import misc
 
 EXPECTED_ERRORS = {
@@ -22,12 +24,12 @@ EXPECTED_ERRORS = {
     'dangerous-view-replace-wo-priority': 5,
     'deprecated-openerp-xml-node': 5,
     'duplicate-id-csv': 2,
-    'duplicate-xml-fields': 6,
+    'duplicate-xml-fields': 8,
     'duplicate-xml-record-id': 2,
     'file-not-used': 6,
     'incoherent-interpreter-exec-perm': 3,
     'invalid-commit': 4,
-    'javascript-lint': 2,
+    'javascript-lint': 8,
     'license-allowed': 1,
     'manifest-author-string': 1,
     'manifest-deprecated-key': 1,
@@ -40,7 +42,7 @@ EXPECTED_ERRORS = {
     'method-search': 1,
     'missing-import-error': 3,
     'missing-manifest-dependency': 2,
-    'missing-newline-extrafiles': 3,
+    'missing-newline-extrafiles': 4,
     'missing-readme': 1,
     'missing-return': 1,
     'no-utf8-coding-comment': 3,
@@ -48,7 +50,7 @@ EXPECTED_ERRORS = {
     'old-api7-method-defined': 2,
     'openerp-exception-warning': 3,
     'redundant-modulename-xml': 1,
-    'rst-syntax-error': 2,
+    'rst-syntax-error': 4,
     'sql-injection': 6,
     'translation-field': 2,
     'translation-required': 4,
@@ -66,7 +68,6 @@ EXPECTED_ERRORS = {
 EXPECTED_ERRORS.update({
     'consider-add-field-help': 4,
     'import-error': 6,
-    'javascript-lint': 8,
     'missing-import-error': 5,
     'missing-manifest-dependency': 4,
     'missing-newline-extrafiles': 4,
@@ -172,7 +173,28 @@ class MainTest(unittest.TestCase):
         real_errors = pylint_res.linter.stats['by_msg']
         self.assertEqual(real_errors.items(), [('deprecated-module', 4)])
 
-    def test_50_without_jslint_installed(self):
+    def test_50_ignore(self):
+        """Test --ignore parameter """
+        extra_params = ['--ignore=test_module/res_users.xml',
+                        '--disable=all',
+                        '--enable=deprecated-openerp-xml-node']
+        pylint_res = self.run_pylint(self.paths_modules, extra_params)
+        real_errors = pylint_res.linter.stats['by_msg']
+        self.assertEqual(real_errors.items(),
+                         [('deprecated-openerp-xml-node', 4)])
+
+    def test_60_ignore_patterns(self):
+        """Test --ignore-patterns parameter """
+        extra_params = ['--ignore-patterns='
+                        '.*\/test_module\/*\/.*xml$',
+                        '--disable=all',
+                        '--enable=deprecated-openerp-xml-node']
+        pylint_res = self.run_pylint(self.paths_modules, extra_params)
+        real_errors = pylint_res.linter.stats['by_msg']
+        self.assertEqual(real_errors.items(),
+                         [('deprecated-openerp-xml-node', 3)])
+
+    def test_70_without_jslint_installed(self):
         """Test without jslint installed"""
         # if not self.jslint_bin_content:
         #     return
@@ -191,7 +213,7 @@ class MainTest(unittest.TestCase):
         self.expected_errors.pop('javascript-lint')
         self.assertEqual(self.expected_errors, real_errors)
 
-    def test_60_with_jslint_error(self):
+    def test_80_with_jslint_error(self):
         """Test with jslint error"""
         # TODO: Use mock to create a monkey patch
         which_original = misc.which
@@ -209,27 +231,6 @@ class MainTest(unittest.TestCase):
         real_errors = pylint_res.linter.stats['by_msg']
         self.expected_errors.pop('javascript-lint')
         self.assertEqual(self.expected_errors, real_errors)
-
-    def test_70_ignore(self):
-        """Test --ignore parameter """
-        extra_params = ['--ignore=test_module/res_users.xml',
-                        '--disable=all',
-                        '--enable=deprecated-openerp-xml-node']
-        pylint_res = self.run_pylint(self.paths_modules, extra_params)
-        real_errors = pylint_res.linter.stats['by_msg']
-        self.assertEqual(real_errors.items(),
-                         [('deprecated-openerp-xml-node', 4)])
-
-    def test_80_ignore_patternls(self):
-        """Test --ignore-patterns parameter """
-        extra_params = ['--ignore-patterns='
-                        '.*\/test_module\/*\/.*xml$',
-                        '--disable=all',
-                        '--enable=deprecated-openerp-xml-node']
-        pylint_res = self.run_pylint(self.paths_modules, extra_params)
-        real_errors = pylint_res.linter.stats['by_msg']
-        self.assertEqual(real_errors.items(),
-                         [('deprecated-openerp-xml-node', 3)])
 
 
 if __name__ == '__main__':

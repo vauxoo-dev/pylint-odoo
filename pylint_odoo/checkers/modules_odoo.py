@@ -3,7 +3,6 @@
 
 import os
 import re
-import collections
 
 import astroid
 import isort
@@ -164,8 +163,6 @@ DFLT_IMPORT_NAME_WHITELIST = [
     'unittest2', 'usb', 'vatnumber', 'vobject', 'werkzeug',
     'wsgiref', 'xlsxwriter', 'xlwt', 'yaml',
 ]
-
-
 DFTL_JSLINTRC = os.path.join(
     os.path.dirname(os.path.dirname(os.path.realpath(__file__))),
     'examples', '.jslintrc'
@@ -218,6 +215,14 @@ class ModuleChecker(misc.WrapperModuleChecker):
             'help': 'List of known import dependencies of odoo,'
             ' separated by a comma.'
         }),
+        ('jslintrc', {
+            'type': 'string',
+            'metavar': '<path to file>',
+            'default': os.environ.get('PYLINT_ODOO_JSLINTRC') or DFTL_JSLINTRC,
+            'help': ('A path to a file that contains a configuration file of '
+                     'javascript lint. You can use the environment variable '
+                     '"PYLINT_ODOO_JSLINTRC" too. Default: %s' % DFTL_JSLINTRC)
+        }),
     )
 
     # Custom options for check of vx to avoid oca conflicts
@@ -233,14 +238,6 @@ class ModuleChecker(misc.WrapperModuleChecker):
             'metavar': '<comma separated values>',
             'default': DFLT_PO_LINT_DISABLE,
             'help': 'List of disabled po-lint checks separated by a comma.'
-        }),
-        ('jslintrc', {
-            'type': 'string',
-            'metavar': '<path to file>',
-            'default': os.environ.get('PYLINT_ODOO_JSLINTRC') or DFTL_JSLINTRC,
-            'help': ('A path to a file that contains a configuration file of '
-                     'javascript lint. You can use the environment variable '
-                     '"PYLINT_ODOO_JSLINTRC" too. Default: %s' % DFTL_JSLINTRC)
         }),
     )
 
@@ -545,22 +542,13 @@ class ModuleChecker(misc.WrapperModuleChecker):
             field_xml = field.attrib.get('name')
             if not field_xml:
                 continue
-            all_fields.setdefault(field_xml, []).append(field)
-        # Remove all keys which not duplicated
-        for key, items in all_fields.items():
-            parents = [e.getparent() for e in items]
-            same_parent = [
-                item for item, count in collections.Counter(parents).items()
-                if count > 1]
-            # Remove elements which are in different parent element
-            # Parents in items but not in same_parent list
-            exclude = list(set(parents) - set(same_parent))
-            for item in items:
-                if item.getparent() in exclude:
-                    items.remove(item)
-            if len(items) < 2:
-                all_fields.pop(key)
-        return all_fields
+            all_fields.setdefault(
+                (field_xml, field.getparent()), []).append(field)
+        # Remove all keys which not duplicated by excluding them from the
+        # returning dict
+        return dict(((field_xml_name, parent_node), nodes) for
+                    (field_xml_name, parent_node), nodes in
+                    all_fields.items() if len(nodes) >= 2)
 
     def _check_duplicate_xml_fields(self):
         """Check duplicate field in all record of xml files of a odoo module.
@@ -580,7 +568,7 @@ class ModuleChecker(misc.WrapperModuleChecker):
                     for name, fobjs in self._get_duplicate_xml_fields(
                             record.xpath(xpath)).items():
                         self.msg_args.append((
-                            "%s:%d" % (xml_file, fobjs[0].sourceline), name,
+                            "%s:%d" % (xml_file, fobjs[0].sourceline), name[0],
                             ', '.join([str(fobj.sourceline)
                                        for fobj in fobjs[1:]]),
                         ))

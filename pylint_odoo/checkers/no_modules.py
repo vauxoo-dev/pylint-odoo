@@ -388,13 +388,13 @@ class NoModuleChecker(BaseChecker):
         >>> self.colon_list_to_dict(['colon:list', 'empty_key:'])
         {'colon': 'list', 'empty_key': ''}
         """
-        return dict([item.split(":") for item in colon_list])
+        return dict(item.split(":") for item in colon_list)
 
     @utils.check_messages('translation-field', 'invalid-commit',
                           'method-compute', 'method-search', 'method-inverse',
-                          'sql-injection', 'consider-add-field-help',
-                          'prefer-other-formatting',
+                          'sql-injection',
                           'renamed-field-parameter',
+                          'consider-add-field-help', 'prefer-other-formatting',
                           'attribute-string-redundant',
                           )
     def visit_call(self, node):
@@ -421,6 +421,7 @@ class NoModuleChecker(BaseChecker):
                     self.add_message('attribute-string-redundant', node=node)
                 if isinstance(argument, astroid.Keyword):
                     argument_aux = argument.value
+                    deprecated = self.config.deprecated_field_parameters
                     if argument.arg in ['compute', 'search', 'inverse'] and \
                             isinstance(argument_aux, astroid.Const) and \
                             isinstance(argument_aux.value, string_types) and \
@@ -434,8 +435,7 @@ class NoModuleChecker(BaseChecker):
                         # The argument "selection_add" is for overwrite field.
                         # Then don't need help.
                         has_help = None
-                    elif (argument.arg in
-                            self.config.deprecated_field_parameters):
+                    elif (argument.arg in deprecated):
                         new_param = self.config.deprecated_field_parameters[
                             argument.arg
                         ]

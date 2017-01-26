@@ -242,8 +242,10 @@ class WrapperModuleChecker(BaseChecker):
         """
         dirnames_to_skip = []
         if skip_examples:
-            dirnames_to_skip.extend(['example', 'examples', 'sample',
-                                     'samples', 'lib', 'doc', 'templates'])
+            dirnames_to_skip.extend([
+                'example', 'examples', 'sample', 'samples', 'lib', 'libs',
+                'doc', 'docs', 'template', 'templates',
+            ])
         if not fext.startswith('.'):
             fext = '.' + fext
         fext = fext.lower()
@@ -279,7 +281,7 @@ class WrapperModuleChecker(BaseChecker):
                                            stderr=subprocess.PIPE)
                 output, err = process.communicate()
                 npm_bin_path = output.strip('\n ')
-                if os.path.isdir(npm_bin_path):
+                if os.path.isdir(npm_bin_path) and not err:
                     npm_bin_paths.append(npm_bin_path)
             if npm_bin_paths:
                 module_bin = which(module, path=os.pathsep.join(npm_bin_paths))
@@ -294,7 +296,6 @@ class WrapperModuleChecker(BaseChecker):
         """
         lint_bin = self.npm_which_module('eslint')
         if not lint_bin:
-            # TODO: Add a log or emit a pylint error
             return []
         cmd = [lint_bin, '--format=unix', fname]
         if frc:
@@ -303,11 +304,9 @@ class WrapperModuleChecker(BaseChecker):
                                    stderr=subprocess.PIPE)
         output, err = process.communicate()
         if process.returncode != 0 and err:
-            # TODO: Add a log or emit a pylint error
             return []
         # Strip multi-line output https://github.com/eslint/eslint/issues/6810
         for old in re.findall(r"`(.*)` instead.", output, re.DOTALL):
-            # TOOD: Replace with "re.sub"
             new = old.split('\n')[0][:20] + '...'
             output = output.replace(old, new)
         output = output.replace(fname, '')
