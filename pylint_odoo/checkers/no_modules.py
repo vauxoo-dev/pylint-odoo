@@ -193,14 +193,14 @@ ODOO_MSGS = {
         settings.DESC_DFLT
     ),
     'W%d12' % settings.BASE_NOMODULE_ID: (
-        'The attribute string is redundant. '
-        'String parameter equal to name of variable',
-        'attribute-string-redundant',
+        '"eval" referenced detected.',
+        'eval-referenced',
         settings.DESC_DFLT
     ),
     'W%d13' % settings.BASE_NOMODULE_ID: (
-        '"eval" referenced detected.',
-        'eval-referenced',
+        'The attribute string is redundant. '
+        'String parameter equal to name of variable',
+        'attribute-string-redundant',
         settings.DESC_DFLT
     ),
 }
@@ -259,10 +259,6 @@ DFTL_ODOO_EXCEPTIONS = [
 DFTL_NO_MISSING_RETURN = [
     '__init__', 'setUp', 'tearDown',
 ]
-DFTL_DEPRECATED_FIELD_PARAMETERS = [
-    # From odoo/odoo 10.0: odoo/odoo/fields.py:29
-    'digits_compute:digits', 'select:index'
-]
 FIELDS_METHOD = {
     'Many2many': 4,
     'One2many': 2,
@@ -270,6 +266,10 @@ FIELDS_METHOD = {
     'Reference': 1,
     'Selection': 1,
 }
+DFTL_DEPRECATED_FIELD_PARAMETERS = [
+    # From odoo/odoo 10.0: odoo/odoo/fields.py:29
+    'digits_compute:digits', 'select:index'
+]
 
 
 class NoModuleChecker(BaseChecker):
@@ -393,9 +393,9 @@ class NoModuleChecker(BaseChecker):
     @utils.check_messages('translation-field', 'invalid-commit',
                           'method-compute', 'method-search', 'method-inverse',
                           'sql-injection',
+                          'attribute-string-redundant',
                           'renamed-field-parameter',
                           'consider-add-field-help', 'prefer-other-formatting',
-                          'attribute-string-redundant',
                           )
     def visit_call(self, node):
         node_infer = utils.safe_infer(node.func)
@@ -408,11 +408,15 @@ class NoModuleChecker(BaseChecker):
             has_help = False
             args = misc.join_node_args_kwargs(node)
             index = 0
+            field_name = ''
+            if (isinstance(node.parent, astroid.Assign) and
+                    node.parent.targets and
+                    isinstance(node.parent.targets[0], astroid.AssignName)):
+                field_name = (node.parent.targets[0].name
+                              .replace('_', ' '))
             for argument in args:
                 argument_aux = argument
                 # Check this 'name = fields.Char("name")'
-                field_name = (argument.parent.parent.targets[0].name
-                              .replace('_', ' '))
                 if (isinstance(argument, astroid.Const) and
                     (index ==
                      FIELDS_METHOD.get(argument.parent.func.attrname, 0)) and
@@ -429,27 +433,25 @@ class NoModuleChecker(BaseChecker):
                                 '_' + argument.arg + '_'):
                         self.add_message('method-' + argument.arg,
                                          node=argument_aux)
+                    # Check if the param string is equal to the name
+                    #   of variable
+                    elif argument.arg == 'string' and \
+                        (isinstance(argument_aux, astroid.Const) and
+                         argument_aux.value in
+                         [field_name.capitalize(), field_name.title()]):
+                        self.add_message(
+                            'attribute-string-redundant', node=node)
+                    elif (argument.arg in deprecated):
+                        self.add_message(
+                            'renamed-field-parameter', node=node,
+                            args=(argument.arg, deprecated[argument.arg])
+                        )
                     elif argument.arg == 'help':
                         has_help = True
                     elif argument.arg == 'selection_add':
                         # The argument "selection_add" is for overwrite field.
                         # Then don't need help.
                         has_help = None
-                    elif (argument.arg in deprecated):
-                        new_param = self.config.deprecated_field_parameters[
-                            argument.arg
-                        ]
-                        self.add_message(
-                            'renamed-field-parameter', node=node,
-                            args=(argument.arg, new_param)
-                        )
-                    # Check if the param string is equal to the name
-                    #   of variable
-                    elif argument.arg == 'string' and \
-                        (argument.value.value in
-                         [field_name.capitalize(), field_name.title()]):
-                        self.add_message(
-                            'attribute-string-redundant', node=node)
                 if isinstance(argument_aux, astroid.CallFunc) and \
                         isinstance(argument_aux.func, astroid.Name) and \
                         argument_aux.func.name == '_':
