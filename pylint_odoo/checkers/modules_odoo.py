@@ -129,7 +129,8 @@ ODOO_MSGS = {
         settings.DESC_DFLT
     ),
     'W%d39' % settings.BASE_OMODULE_ID: (
-        '%s Deprecated <data> xml node indide <odoo> xml node',
+        '%s Use <odoo> instead of <odoo><data> or use <odoo noupdate="1">'
+        'instead of <odoo><data noupdate="1">',
         'deprecated-data-xml-node',
         settings.DESC_DFLT
     )
