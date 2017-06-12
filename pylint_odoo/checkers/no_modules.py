@@ -122,8 +122,8 @@ ODOO_MSGS = {
         settings.DESC_DFLT
     ),
     'E%d03' % settings.BASE_NOMODULE_ID: (
-        'Use of "%" operator in execute database method. '
-        'Better use parameters instead. - More info '
+        'SQL injection risk. '
+        'Use parameters if you can. - More info '
         'https://github.com/OCA/maintainer-tools/blob/master/CONTRIBUTING.md'
         '#no-sql-injection',
         'sql-injection',
@@ -168,17 +168,17 @@ ODOO_MSGS = {
         settings.DESC_DFLT
     ),
     'C%d08' % settings.BASE_NOMODULE_ID: (
-        'Name of compute method should starts with "_compute_"',
+        'Name of compute method should start with "_compute_"',
         'method-compute',
         settings.DESC_DFLT
     ),
     'C%d09' % settings.BASE_NOMODULE_ID: (
-        'Name of search method should starts with "_search_"',
+        'Name of search method should start with "_search_"',
         'method-search',
         settings.DESC_DFLT
     ),
     'C%d10' % settings.BASE_NOMODULE_ID: (
-        'Name of inverse method should starts with "_inverse_"',
+        'Name of inverse method should start with "_inverse_"',
         'method-inverse',
         settings.DESC_DFLT
     ),
@@ -390,6 +390,18 @@ class NoModuleChecker(BaseChecker):
         """
         return dict(item.split(":") for item in colon_list)
 
+    def _check_node_for_sqli_risk(self, node):
+        is_bin_op = (isinstance(node, astroid.BinOp) and
+                     node.op in ('%', '+') and
+                     # ignore self._table / model._table / self._uid...
+                     not (isinstance(node.right, astroid.Attribute) and
+                          node.right.attrname.startswith('_')))
+
+        is_format = (isinstance(node, astroid.CallFunc) and
+                     self.get_func_name(node.func) == 'format')
+
+        return is_bin_op or is_format
+
     @utils.check_messages('translation-field', 'invalid-commit',
                           'method-compute', 'method-search', 'method-inverse',
                           'sql-injection',
@@ -465,17 +477,35 @@ class NoModuleChecker(BaseChecker):
                 node.func.attrname == 'commit' and \
                 self.get_cursor_name(node.func) in self.config.cursor_expr:
             self.add_message('invalid-commit', node=node)
+
         # SQL Injection
         if isinstance(node, astroid.CallFunc) and node.args and \
                 isinstance(node.func, astroid.Getattr) and \
-                node.func.attrname == 'execute' and \
+                node.func.attrname in ('execute', 'executemany') and \
                 self.get_cursor_name(node.func) in self.config.cursor_expr:
+
             first_arg = node.args[0]
-            is_bin_op = isinstance(first_arg, astroid.BinOp) and \
-                first_arg.op == '%'
-            is_format = isinstance(first_arg, astroid.CallFunc) and \
-                self.get_func_name(first_arg.func) == 'format'
-            if is_bin_op or is_format:
+
+            risky = self._check_node_for_sqli_risk(first_arg)
+
+            if (not risky and isinstance(first_arg,
+                                         (astroid.Name, astroid.Subscript))):
+
+                # 1) look for parent method / controller
+                current = node
+                while (current and
+                       not isinstance(current.parent, astroid.FunctionDef)):
+                    current = current.parent
+                parent = current.parent
+
+                # 2) check how was the variable built
+                for node in parent.nodes_of_class(astroid.Assign):
+                    if node.targets[0].as_string() == first_arg.as_string():
+                        risky = self._check_node_for_sqli_risk(node.value)
+                        if risky:
+                            break
+
+            if risky:
                 self.add_message('sql-injection', node=node)
 
     @utils.check_messages(
