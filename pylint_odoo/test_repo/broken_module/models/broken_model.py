@@ -49,6 +49,15 @@ class TestModel(models.Model):
         copy=True,
     )
 
+    # This is a inherit overwrite field then don't should show errors related
+    # with creation of fields.
+    def method_date(self):
+        date = fields.Date.to_string(
+            fields.Datetime.context_timestamp(self,
+                                              timestamp=fields.Datetime.now())
+        )
+        return date
+
     my_ok_field = fields.Float(
         "My correctly named field",
         digits=(6, 6),  # OK: Valid field parameter
