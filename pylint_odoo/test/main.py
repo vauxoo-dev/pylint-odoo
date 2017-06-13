@@ -50,8 +50,8 @@ EXPECTED_ERRORS = {
     'old-api7-method-defined': 2,
     'openerp-exception-warning': 3,
     'redundant-modulename-xml': 1,
-    'rst-syntax-error': 4,
-    'sql-injection': 6,
+    'rst-syntax-error': 2,
+    'sql-injection': 15,
     'translation-field': 2,
     'translation-required': 4,
     'use-vim-comment': 1,
@@ -62,6 +62,7 @@ EXPECTED_ERRORS = {
     'attribute-string-redundant': 33,
     'renamed-field-parameter': 2,
     'deprecated-data-xml-node': 5,
+    'resource-not-exist': 3,
 }
 
 
