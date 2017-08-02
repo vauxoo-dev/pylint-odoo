@@ -12,5 +12,6 @@ git+https://github.com/PyCQA/pylint.git@f83dd399#egg=pylint
 translate-toolkit==1.13.0
 polib==1.0.7
 whichcraft
+rfc3986
 singledispatch==3.4
 future==0.16
