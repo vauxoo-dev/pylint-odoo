@@ -13,3 +13,4 @@ translate-toolkit==1.13.0
 polib==1.0.7
 whichcraft
 singledispatch==3.4
+future==0.16
