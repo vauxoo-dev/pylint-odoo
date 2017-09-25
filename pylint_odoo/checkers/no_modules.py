@@ -251,12 +251,12 @@ DFTL_ATTRIBUTE_DEPRECATED = [
 ]
 DFTL_METHOD_REQUIRED_SUPER = [
     'create', 'write', 'read', 'unlink', 'copy',
-    'setUp', 'tearDown', 'default_get',
+    'setUp', 'setUpClass', 'tearDown', 'default_get',
 ]
 DFTL_VALID_ODOO_VERSIONS = [
     '4.2', '5.0', '6.0', '6.1', '7.0', '8.0', '9.0', '10.0'
 ]
-DFTL_MANIFEST_VERSION_FORMAT = r"(%(valid_odoo_versions)s)\.\d+\.\d+\.\d+"
+DFTL_MANIFEST_VERSION_FORMAT = r"({valid_odoo_versions})\.\d+\.\d+\.\d+$"
 DFTL_CURSOR_EXPR = [
     'self.env.cr', 'self._cr',  # new api
     'self.cr',  # controllers and test
@@ -269,7 +269,7 @@ DFTL_ODOO_EXCEPTIONS = [
     'ValidationError', 'Warning',
 ]
 DFTL_NO_MISSING_RETURN = [
-    '__init__', 'setUp', 'tearDown',
+    '__init__', 'setUp', 'setUpClass', 'tearDown',
 ]
 FIELDS_METHOD = {
     'Many2many': 4,
@@ -350,7 +350,7 @@ class NoModuleChecker(BaseChecker):
             'metavar': '<string>',
             'default': DFTL_MANIFEST_VERSION_FORMAT,
             'help': 'Regex to check version format in manifest file. '
-            'Use "%(valid_odoo_versions)s" to check the parameter of '
+            'Use "{valid_odoo_versions}" to check the parameter of '
             '"valid_odoo_versions"'
         }),
         ('cursor_expr', {
@@ -651,7 +651,8 @@ class NoModuleChecker(BaseChecker):
             there_is_return = True
             break
         if there_is_super and not there_is_return and \
-           node.name not in self.config.no_missing_return:
+                not node.is_generator() and \
+                node.name not in self.config.no_missing_return:
             self.add_message('missing-return', node=node, args=(node.name))
 
     @utils.check_messages('openerp-exception-warning')
@@ -690,9 +691,11 @@ class NoModuleChecker(BaseChecker):
         return re.sub(r"(?:^|_)(.)", lambda m: m.group(1).upper(), string)
 
     def formatversion(self, string):
-        self.config.manifest_version_format_parsed = \
-            self.config.manifest_version_format % dict(
-                valid_odoo_versions='|'.join(self.config.valid_odoo_versions))
+        valid_odoo_versions = '|'.join(
+            map(re.escape, self.config.valid_odoo_versions))
+        self.config.manifest_version_format_parsed = (
+            self.config.manifest_version_format.format(
+                valid_odoo_versions=valid_odoo_versions))
         return re.match(self.config.manifest_version_format_parsed, string)
 
     def get_decorators_names(self, decorators):
