@@ -13,7 +13,8 @@ from pylint.checkers import BaseChecker
 from pylint.interfaces import IAstroidChecker
 from pylint.utils import _basename_in_blacklist_re
 from restructuredtext_lint import lint_file as rst_lint
-from translate.storage import factory, pypo
+from translate.misc import wStringIO
+from translate.storage import po, factory, pypo
 from translate.filters.pofilter import (build_checkerconfig, pocheckfilter,
                                         cmdlineparser)
 from six import string_types
@@ -53,16 +54,17 @@ def join_node_args_kwargs(node):
 class PoLinter(pocheckfilter):
     def get_syntax_error(self, transfile):
         try:
-            pouns = pypo.pofile(str(polib.pofile(transfile.filename)))
+            posource = polib.pofile(transfile.filename)
+            pouns = po.pofile(wStringIO.StringIO(str(posource)))
         except BaseException as e:
-            yield ': (%s) %s' % (type(e).__name__, e.message)
+            yield ': (%s) %s' % (type(e).__name__, e.__str__())
         else:
             del pouns
 
     def get_errors_wlno(self, transfile):
         try:
             polno = polib.pofile(transfile.filename)
-            pouns = pypo.pofile(str(polno)).units[1:]
+            pouns = pypo.pofile(wStringIO.StringIO(str(polno))).units[1:]
         except BaseException as e:
             pass
         else:
@@ -402,11 +404,12 @@ class WrapperModuleChecker(BaseChecker):
             parser = cmdlineparser()
             options = parser.parse_args()[0]
 
-        with open(options.input, 'r') as pofile:
+        with open(options.input, 'rb') as pofile:
             fromfile = factory.getobject(pofile)
 
         polinter = PoLinter(options=options,
                             checkerconfig=build_checkerconfig(options))
+
         return list(polinter.get_errors_wlno(fromfile))
 
     def get_duplicated_items(self, items):

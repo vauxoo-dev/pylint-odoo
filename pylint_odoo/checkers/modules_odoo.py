@@ -7,7 +7,7 @@ import re
 import astroid
 import isort
 from pylint.checkers import utils
-from six import string_types
+from six import next, string_types
 
 from .. import misc, settings
 
@@ -295,7 +295,7 @@ class ModuleChecker(misc.WrapperModuleChecker):
             node.parent.odoo_attribute_name = node.value.value
             return
         try:
-            _name = node.parent.igetattr('_name').next().value
+            _name = next(node.parent.igetattr('_name')).value
         except astroid.exceptions.InferenceError:
             _name = None
         _inherit = node.value.value
