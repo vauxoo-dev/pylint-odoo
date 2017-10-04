@@ -46,7 +46,7 @@ EXPECTED_ERRORS = {
     'missing-newline-extrafiles': 4,
     'missing-readme': 1,
     'missing-return': 1,
-    'no-utf8-coding-comment': 3,
+    'no-utf8-coding-comment': 6,
     'odoo-addons-relative-import': 4,
     'old-api7-method-defined': 2,
     'openerp-exception-warning': 3,
