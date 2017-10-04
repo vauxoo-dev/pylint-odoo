@@ -13,9 +13,11 @@ from pylint.checkers import BaseChecker
 from pylint.interfaces import IAstroidChecker
 from pylint.utils import _basename_in_blacklist_re
 from restructuredtext_lint import lint_file as rst_lint
-from translate.storage import factory, pypo
+from translate.misc import wStringIO
+from translate.storage import po, factory, pypo
 from translate.filters.pofilter import (build_checkerconfig, pocheckfilter,
                                         cmdlineparser)
+from six import string_types
 
 from . import settings
 
@@ -52,16 +54,17 @@ def join_node_args_kwargs(node):
 class PoLinter(pocheckfilter):
     def get_syntax_error(self, transfile):
         try:
-            pouns = pypo.pofile(str(polib.pofile(transfile.filename)))
+            posource = polib.pofile(transfile.filename)
+            pouns = po.pofile(wStringIO.StringIO(str(posource)))
         except BaseException as e:
-            yield ': (%s) %s' % (type(e).__name__, e.message)
+            yield ': (%s) %s' % (type(e).__name__, e.__str__())
         else:
             del pouns
 
     def get_errors_wlno(self, transfile):
         try:
             polno = polib.pofile(transfile.filename)
-            pouns = pypo.pofile(str(polno)).units[1:]
+            pouns = pypo.pofile(wStringIO.StringIO(str(polno))).units[1:]
         except BaseException as e:
             pass
         else:
@@ -185,7 +188,7 @@ class WrapperModuleChecker(BaseChecker):
         self.module = os.path.basename(self.module_path)
         self.set_caches()
         for msg_code, (title, name_key, description) in \
-                sorted(self.msgs.iteritems()):
+                sorted(self.msgs.items()):
             self.msg_code = msg_code
             self.msg_name_key = name_key
             self.msg_args = None
@@ -212,7 +215,7 @@ class WrapperModuleChecker(BaseChecker):
                         node.lineno = node_lineno_original
 
     def set_extra_file(self, node, msg_args, msg_code):
-        if isinstance(msg_args, basestring):
+        if isinstance(msg_args, string_types):
             msg_args = (msg_args,)
         first_arg = msg_args and msg_args[0] or ""
         fregex_str = \
@@ -300,7 +303,8 @@ class WrapperModuleChecker(BaseChecker):
 
                 parser = etree.XMLParser(target=PylintCommentTarget())
                 try:
-                    skips = etree.parse(open(full_name), parser)
+                    with open(full_name, 'rb') as xml_file:
+                        skips = etree.parse(xml_file, parser)
                 except etree.XMLSyntaxError:
                     skips = []
                     pass
@@ -325,6 +329,8 @@ class WrapperModuleChecker(BaseChecker):
                                            stdout=subprocess.PIPE,
                                            stderr=subprocess.PIPE)
                 output, err = process.communicate()
+                output = output.decode('UTF-8')
+                err = err.decode('UTF-8')
                 npm_bin_path = output.strip('\n ')
                 if os.path.isdir(npm_bin_path) and not err:
                     npm_bin_paths.append(npm_bin_path)
@@ -348,6 +354,8 @@ class WrapperModuleChecker(BaseChecker):
         process = subprocess.Popen(cmd, stdout=subprocess.PIPE,
                                    stderr=subprocess.PIPE)
         output, err = process.communicate()
+        output = output.decode('UTF-8')
+        err = err.decode('UTF-8')
         if process.returncode != 0 and err:
             return []
         # Strip multi-line output https://github.com/eslint/eslint/issues/6810
@@ -396,11 +404,12 @@ class WrapperModuleChecker(BaseChecker):
             parser = cmdlineparser()
             options = parser.parse_args()[0]
 
-        with open(options.input, 'r') as pofile:
+        with open(options.input, 'rb') as pofile:
             fromfile = factory.getobject(pofile)
 
         polinter = PoLinter(options=options,
                             checkerconfig=build_checkerconfig(options))
+
         return list(polinter.get_errors_wlno(fromfile))
 
     def get_duplicated_items(self, items):
@@ -426,9 +435,10 @@ class WrapperModuleChecker(BaseChecker):
         if not os.path.isfile(xml_file):
             return etree.Element("__empty__")
         try:
-            doc = etree.parse(open(xml_file))
+            with open(xml_file, "rb") as f:
+                doc = etree.parse(f)
         except etree.XMLSyntaxError as xmlsyntax_error_exception:
-            return xmlsyntax_error_exception.message
+            return str(xmlsyntax_error_exception)
         return doc
 
     def get_xml_records(self, xml_file, model=None, more=None):
@@ -455,7 +465,7 @@ class WrapperModuleChecker(BaseChecker):
         doc = self.parse_xml(xml_file)
         return doc.xpath("/openerp//record" + model_filter + more_filter) + \
             doc.xpath("/odoo//record" + model_filter + more_filter) \
-            if not isinstance(doc, basestring) else []
+            if not isinstance(doc, string_types) else []
 
     def get_field_csv(self, csv_file, field='id'):
         """Get xml ids from csv file
@@ -463,7 +473,7 @@ class WrapperModuleChecker(BaseChecker):
         :param field: Field to search
         :return: List of string with field rows
         """
-        with open(csv_file, 'rb') as csvfile:
+        with open(csv_file, 'r') as csvfile:
             lines = csv.DictReader(csvfile)
             return [line[field] for line in lines if field in line]
 
