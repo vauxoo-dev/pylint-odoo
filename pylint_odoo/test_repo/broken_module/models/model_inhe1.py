@@ -1,6 +1,7 @@
 # coding: utf-8
 
 from openerp import models
+from .no_exists import dot_package
 
 # to tests a suppression of a import-error
 from odoo import tools
@@ -16,7 +17,8 @@ class TestModel(models.Model):
     _inherit = 'res.company'
 
     def method(self):
-        return tools, odoo, addons, partner, no_exists, package
+        return (tools, odoo, addons, partner, no_exists, package,
+                dot_package)
 
 
 class TestModel2(models.Model):

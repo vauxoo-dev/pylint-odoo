@@ -41,7 +41,7 @@ EXPECTED_ERRORS = {
     'method-inverse': 1,
     'method-required-super': 8,
     'method-search': 1,
-    'missing-import-error': 3,
+    'missing-import-error': 4,
     'missing-manifest-dependency': 2,
     'missing-newline-extrafiles': 4,
     'missing-readme': 1,
@@ -74,8 +74,8 @@ EXPECTED_ERRORS = {
 # Checks not oca just vx to avoid oca conflicts
 EXPECTED_ERRORS.update({
     'consider-add-field-help': 4,
-    'import-error': 6,
-    'missing-import-error': 5,
+    'import-error': 7,
+    'missing-import-error': 6,
     'missing-manifest-dependency': 4,
     'missing-newline-extrafiles': 4,
     'po-lint': 4,
