@@ -8,9 +8,11 @@ import inspect
 from contextlib import contextmanager
 
 import polib
+from distutils.version import LooseVersion
 from lxml import etree
-from pylint.checkers import BaseChecker
-from pylint.interfaces import IAstroidChecker
+from pylint.checkers import BaseChecker, BaseTokenChecker
+from pylint.interfaces import UNDEFINED
+from pylint.interfaces import IAstroidChecker, ITokenChecker
 from pylint.utils import _basename_in_blacklist_re
 from restructuredtext_lint import lint_file as rst_lint
 from translate.misc import wStringIO
@@ -25,6 +27,11 @@ try:
     from shutil import which  # python3.x
 except ImportError:
     from whichcraft import which
+
+DFTL_VALID_ODOO_VERSIONS = [
+    '4.2', '5.0', '6.0', '6.1', '7.0', '8.0', '9.0', '10.0', '11.0', '12.0',
+]
+DFTL_MANIFEST_VERSION_FORMAT = r"({valid_odoo_versions})\.\d+\.\d+\.\d+$"
 
 
 def get_plugin_msgs(pylint_run_res):
@@ -88,21 +95,25 @@ def custom_sys_argv(args):
 
 
 # TODO: Change all methods here
-class WrapperModuleChecker(BaseChecker):
+class PylintOdooChecker(BaseChecker):
 
+    # Auto call to `process_tokens` method
     __implements__ = IAstroidChecker
 
-    node = None
-    module_path = None
-    msg_args = None
-    msg_code = None
-    msg_name_key = None
     odoo_node = None
     odoo_module_name = None
     manifest_file = None
-    module = None
     manifest_dict = None
-    is_main_odoo_module = None
+
+    def formatversion(self, string):
+        valid_odoo_versions = self.linter._all_options[
+            'valid_odoo_versions'].config.valid_odoo_versions
+        valid_odoo_versions = '|'.join(
+            map(re.escape, DFTL_VALID_ODOO_VERSIONS))
+        self.config.manifest_version_format_parsed = (
+            DFTL_MANIFEST_VERSION_FORMAT.format(
+                valid_odoo_versions=valid_odoo_versions))
+        return re.match(self.config.manifest_version_format_parsed, string)
 
     def get_manifest_file(self, node_file):
         """Get manifest file path
@@ -148,9 +159,6 @@ class WrapperModuleChecker(BaseChecker):
     def leave_module(self, node):
         """Clear caches"""
         self.clear_caches()
-
-    def open(self):
-        self.odoo_node = None
 
     def wrapper_visit_module(self, node):
         """Call methods named with name-key from self.msgs
@@ -213,6 +221,60 @@ class WrapperModuleChecker(BaseChecker):
                                          args=msg_args_extra)
                         node.file = node_file_original
                         node.lineno = node_lineno_original
+
+    def visit_module(self, node):
+        self.wrapper_visit_module(node)
+
+    def add_message(self, msg_id, line=None, node=None, args=None,
+                    confidence=UNDEFINED):
+        version = (self.manifest_dict.get('version')
+                   if isinstance(self.manifest_dict, dict) else '')
+        match = self.formatversion(version)
+        short_version = match.group(1) if match else ''
+        if not short_version:
+            valid_odoo_versions = self.linter._all_options[
+                'valid_odoo_versions'].config.valid_odoo_versions
+            short_version = (valid_odoo_versions[0] if
+                             len(valid_odoo_versions) == 1 else '')
+        if not self._is_version_supported(short_version, msg_id):
+            return
+        return super(PylintOdooChecker, self).add_message(
+            msg_id, line, node, args, confidence)
+
+    def _is_version_supported(self, version, name_check):
+        if not version or not hasattr(self, 'odoo_check_versions'):
+            return True
+        odoo_check_versions = self.odoo_check_versions.get(name_check, {})
+        if not odoo_check_versions:
+            return True
+        version = LooseVersion(version)
+        min_odoo_version = LooseVersion(odoo_check_versions.get(
+            'min_odoo_version', DFTL_VALID_ODOO_VERSIONS[0]))
+        max_odoo_version = LooseVersion(odoo_check_versions.get(
+            'max_odoo_version', DFTL_VALID_ODOO_VERSIONS[-1]))
+        return (min_odoo_version <= version <= max_odoo_version)
+
+
+class PylintOdooTokenChecker(BaseTokenChecker, PylintOdooChecker):
+
+    # Auto call to `process_tokens` method
+    __implements__ = (ITokenChecker, IAstroidChecker)
+
+
+# TODO: Change all methods here
+
+class WrapperModuleChecker(PylintOdooChecker):
+
+    node = None
+    module_path = None
+    msg_args = None
+    msg_code = None
+    msg_name_key = None
+    module = None
+    is_main_odoo_module = None
+
+    def open(self):
+        self.odoo_node = None
 
     def set_extra_file(self, node, msg_args, msg_code):
         if isinstance(msg_args, string_types):
