@@ -81,7 +81,7 @@ EXPECTED_ERRORS.update({
     'missing-newline-extrafiles': 4,
     'po-lint': 4,
     'po-syntax-error': 1,
-    'prefer-other-formatting': 4,
+    'prefer-other-formatting': 6,
 })
 
 
