@@ -55,7 +55,7 @@ EXPECTED_ERRORS = {
     'rst-syntax-error': 2,
     'sql-injection': 15,
     'translation-field': 2,
-    'translation-required': 14,
+    'translation-required': 15,
     'use-vim-comment': 1,
     'wrong-tabs-instead-of-spaces': 2,
     'eval-referenced': 5,
@@ -81,7 +81,7 @@ EXPECTED_ERRORS.update({
     'missing-newline-extrafiles': 4,
     'po-lint': 4,
     'po-syntax-error': 1,
-    'prefer-other-formatting': 6,
+    'prefer-other-formatting': 8,
 })
 
 
