@@ -505,24 +505,24 @@ class NoModuleChecker(misc.PylintOdooChecker):
                 if isinstance(value, astroid.Const):
                     as_string = value.as_string()
                 # case: message_post(body='String %s' % (...))
-                elif (isinstance(value, astroid.BinOp) and
-                        value.op == '%' and
-                        isinstance(value.left, astroid.Const) and
+                elif (isinstance(value, astroid.BinOp)
+                        and value.op == '%'
+                        and isinstance(value.left, astroid.Const)
                         # The right part is translatable only if it's a
                         # function or a list of functions
-                        not (
+                        and not (
                             isinstance(value.right, (
-                                astroid.Call, astroid.Tuple, astroid.List)) and
-                            all([
+                                astroid.Call, astroid.Tuple, astroid.List))
+                            and all([
                                 isinstance(child, astroid.Call)
                                 for child in getattr(value.right, 'elts', [])
                             ]))):
                     as_string = value.left.as_string()
                 # case: message_post(body='String {...}'.format(...))
-                elif (isinstance(value, astroid.Call) and
-                        isinstance(value.func, astroid.Attribute) and
-                        isinstance(value.func.expr, astroid.Const) and
-                        value.func.attrname == 'format'):
+                elif (isinstance(value, astroid.Call)
+                        and isinstance(value.func, astroid.Attribute)
+                        and isinstance(value.func.expr, astroid.Const)
+                        and value.func.attrname == 'format'):
                     as_string = value.func.expr.as_string()
                 if as_string:
                     keyword = keyword and '%s=' % keyword
