@@ -117,6 +117,8 @@ Enable custom checks for Odoo modules.
 +-------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------+
 | W8114 | Website "%s" in manifest key is not a valid URI                                                                                                                                                                                                                                                    | website-manifest-key-not-valid-uri   |
 +-------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------+
+| W8115 | Translatable term in "%s" contains variables. Use %s instead                                                                                                                                                                                                                                       | translation-contains-variable        |
++-------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------+
 | W8201 | You have a python file with execution permissions but you don't have a interpreter magic comment. If you really needs a execution permission then add a magic comment ( https://en.wikipedia.org/wiki/Shebang_(Unix) ). If you don't needs a execution permission then remove it with: chmod -x %s | incoherent-interpreter-exec-perm     |
 +-------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------+
 | W8202 | Use of vim comment                                                                                                                                                                                                                                                                                 | use-vim-comment                      |
@@ -148,25 +150,25 @@ If you have external files you can add them in ``examples`` folder to skip.
 For rst-syntax-error skip unknown directives
 
 Skip one xml check
---------------
+------------------
 
 If you need to skip one check in one xml file you can use the follow way
 
-```xml
-<?xml version="1.0" encoding="utf-8"?>
-<!-- pylint:disable=name-of-check-to-skip -->
-<odoo>
-    ...
-</odoo>
-```
+.. code-block:: xml
 
-```xml
-<?xml version="1.0" encoding="utf-8"?>
-<!-- pylint:disable=name-of-check-to-skip, second-name-check-to-skip -->
-<odoo>
+    <?xml version="1.0" encoding="utf-8"?>
+    <!-- pylint:disable=name-of-check-to-skip -->
+    <odoo>
     ...
-</odoo>
-```
+    </odoo>
+
+.. code-block:: xml
+
+    <?xml version="1.0" encoding="utf-8"?>
+    <!-- pylint:disable=name-of-check-to-skip, second-name-check-to-skip -->
+    <odoo>
+    ...
+    </odoo>
 
 This skip only work with the name of the check, not work with the name of check
 
