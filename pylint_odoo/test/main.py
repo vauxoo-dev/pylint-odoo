@@ -77,8 +77,8 @@ EXPECTED_ERRORS = {
 EXPECTED_ERRORS.update({
     'consider-add-field-help': 4,
     'import-error': 7,
-    'missing-import-error': 6,
-    'missing-manifest-dependency': 4,
+    'missing-import-error': 9,
+    'missing-manifest-dependency': 7,
     'missing-newline-extrafiles': 4,
     'po-lint': 4,
     'po-syntax-error': 1,
