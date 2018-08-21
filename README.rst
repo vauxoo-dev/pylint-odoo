@@ -23,7 +23,7 @@ Enable custom checks for Odoo modules.
 +-------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------+
 | C8106 | Wrong Version Format "%s" in manifest file. Regex to match: "%s"                                                                                                                                                                                                                                   | manifest-version-format              |
 +-------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------+
-| C8107 | String parameter of raise "%s" requires translation. Use _(%s)                                                                                                                                                                                                                                     | translation-required                 |
+| C8107 | String parameter on "%s" requires translation. Use %s_(%s)                                                                                                                                                                                                                                         | translation-required                 |
 +-------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------+
 | C8108 | Name of compute method should start with "_compute_"                                                                                                                                                                                                                                               | method-compute                       |
 +-------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------+
@@ -148,6 +148,27 @@ Example to test just odoo-lint case:
 If you have external files you can add them in ``examples`` folder to skip.
 
 For rst-syntax-error skip unknown directives
+
+Skip one check based on the Odoo version
+----------------------------------------
+
+If you need to restrict a check to specific version(s) of Odoo, use the new variable ``odoo_check_versions``
+
+For example, if you have one new check `your-new-check` and you need to run it only
+if the Odoo version is between 9.0 and 11.0, inside the class you should declare the following :
+
+.. code-block:: python
+
+    ...
+    class FormatChecker(PylintOdooTokenChecker):
+    ...
+        odoo_check_versions = {
+            'your-new-check': {
+                'min_odoo_version': '9.0',
+                'max_odoo_version': '10.0',
+            }
+        }
+    ...
 
 Skip one xml check
 ------------------
