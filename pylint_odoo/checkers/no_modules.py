@@ -109,6 +109,13 @@ ODOO_MSGS = {
         'missing-return',
         settings.DESC_DFLT
     ),
+    'W%d11' % settings.BASE_NOMODULE_ID: (
+        'Context overridden using dictionary directly. '
+        'Better using keyword args (kwargs) like ".with_context(key=value)"',
+        'context-overridden',
+        settings.DESC_DFLT
+    ),
+
     'E%d01' % settings.BASE_NOMODULE_ID: (
         'The author key in the manifest file must be a string '
         '(with comma separated values)',
@@ -195,11 +202,6 @@ ODOO_MSGS = {
         'old-api7-method-defined',
         settings.DESC_DFLT
     ),
-    'W%d11' % settings.BASE_NOMODULE_ID: (
-        'Field parameter "%s" is no longer supported. Use "%s" instead.',
-        'renamed-field-parameter',
-        settings.DESC_DFLT
-    ),
     'W%d12' % settings.BASE_NOMODULE_ID: (
         '"eval" referenced detected.',
         'eval-referenced',
@@ -224,6 +226,11 @@ ODOO_MSGS = {
     'W%d16' % settings.BASE_NOMODULE_ID: (
         'Print used. Use `logger` instead.',
         'print-used',
+        settings.DESC_DFLT
+    ),
+    'W%d17' % settings.BASE_NOMODULE_ID: (
+        'Field parameter "%s" is no longer supported. Use "%s" instead.',
+        'renamed-field-parameter',
         settings.DESC_DFLT
     ),
     'F%d01' % settings.BASE_NOMODULE_ID: (
@@ -436,6 +443,7 @@ class NoModuleChecker(misc.PylintOdooChecker):
                           'translation-required',
                           'translation-contains-variable',
                           'print-used',
+                          'context-overridden',
                           )
     def visit_call(self, node):
         infer_node = utils.safe_infer(node.func)
@@ -495,6 +503,14 @@ class NoModuleChecker(misc.PylintOdooChecker):
                 node.func.attrname == 'commit' and \
                 self.get_cursor_name(node.func) in self.config.cursor_expr:
             self.add_message('invalid-commit', node=node)
+
+        if (isinstance(node, astroid.Call) and
+                isinstance(node.func, astroid.Attribute) and
+                node.func.attrname == 'with_context' and
+                not node.keywords and node.args):
+            # Check sentences like *.with_context(dict)
+            if isinstance(node.args[0], astroid.Dict):
+                self.add_message('context-overridden', node=node)
 
         # Call the message_post()
         if (isinstance(node, astroid.Call) and
