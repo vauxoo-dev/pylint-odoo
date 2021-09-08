@@ -54,6 +54,9 @@ class TestModel(models.Model):
         'Other Field2',
         copy=True,
     )
+    field_related = fields.Char('Field Related', related='model_id.related_field')
+    other_field_related = fields.Char(
+        related='model_id.related_field', string='Other Field Related')
 
     # This is a inherit overwrite field then don't should show errors related
     # with creation of fields.
@@ -484,3 +487,11 @@ class TestModel(models.Model):
             "CREATE VIEW %s AS (SELECT * FROM res_partner)" % _variable)
         self._cr.execute(
             "CREATE VIEW %s AS (SELECT * FROM res_partner)" % variable)
+
+    def func(a):
+        length = len(a)
+        return length
+
+
+class NoOdoo(object):
+    length = 0
