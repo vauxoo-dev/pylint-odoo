@@ -477,7 +477,6 @@ class NoModuleChecker(misc.PylintOdooChecker):
 
     def _check_node_for_sqli_risk(self, node):
         if isinstance(node, astroid.BinOp) and node.op in ('%', '+'):
-            binop_recursive_allowable = []
             if isinstance(node.left, astroid.BinOp) and self._check_node_for_sqli_risk(node.left):
                 # Consider self.cr.execute('SELECT ' + operator + ' FROM table')"
                 # node.repr_tree()
