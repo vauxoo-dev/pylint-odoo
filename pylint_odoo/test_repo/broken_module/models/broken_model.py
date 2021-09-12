@@ -530,13 +530,20 @@ class TestModel(models.Model):
     def sql_no_injection_constants(self):
         self.env.cr.execute("SELECT * FROM %s" % 'table_constant')
         self.env.cr.execute("SELECT * FROM {}".format('table_constant'))
-        self.env.cr.execute("SELECT * FROM %(table_variable)s" % {'table_variable': 'table_constant'})
+        self.env.cr.execute("SELECT * FROM %(table_constant)s" % {'table_constant': 'table_constant'})
 
-        # TODO: Consider this case as valid
-        # table_variable = 'table_constant'
-        # self.env.cr.execute("SELECT * FROM %s" % table_variable)
-        # self.env.cr.execute("SELECT * FROM {}".format(table_variable))
-        # self.env.cr.execute("SELECT * FROM %(table_variable)s" % {'table_variable': table_variable})
+        # TODO: Consider these cases as no sql-injection
+        table_variable = 'table_constant'
+        self.env.cr.execute("SELECT * FROM %s" % table_variable)
+        self.env.cr.execute("SELECT * FROM {}".format(table_variable))
+        self.env.cr.execute("SELECT * FROM %(table_variable)s" % {'table_variable': table_variable})
+
+        query1 = "SELECT * FROM %s"
+        self.env.cr.execute(query1 % table_variable)
+        query2 = "SELECT * FROM {}"
+        self.env.cr.execute(query2.format(table_variable))
+        query3 = "SELECT * FROM %(table_variable)s"
+        self.env.cr.execute(query3 % {'table_variable': table_variable})
 
     def func(self, a):
         length = len(a)

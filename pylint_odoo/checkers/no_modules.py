@@ -445,6 +445,12 @@ class NoModuleChecker(misc.PylintOdooChecker):
             node = node.func
         # self._thing is OK (mostly self._table), self._thing() also because
         # it's a common pattern of reports (self._select, self._group_by, ...)
+        if isinstance(node, astroid.Name):
+            for assignation_node in self._get_assignation_nodes(node):
+                if not self._sqli_allowable(assignation_node):
+                    return False
+            import ipdb;ipdb.set_trace()
+            return True
         return (isinstance(node, astroid.Attribute)
                 and isinstance(node.expr, astroid.Name)
                 and node.attrname.startswith('_')
@@ -477,6 +483,7 @@ class NoModuleChecker(misc.PylintOdooChecker):
 
     def _check_node_for_sqli_risk(self, node):
         if isinstance(node, astroid.BinOp) and node.op in ('%', '+'):
+            # TODO: Consider node.left if it is not a constant
             if isinstance(node.left, astroid.BinOp) and self._check_node_for_sqli_risk(node.left):
                 # Consider self.cr.execute('SELECT ' + operator + ' FROM table')"
                 # node.repr_tree()
