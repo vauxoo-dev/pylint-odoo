@@ -527,6 +527,17 @@ class TestModel(models.Model):
             )
         )
 
+    def sql_no_injection_constants(self):
+        self.env.cr.execute("SELECT * FROM %s" % 'table_constant')
+        self.env.cr.execute("SELECT * FROM {}".format('table_constant'))
+        self.env.cr.execute("SELECT * FROM %(table_variable)s" % {'table_variable': 'table_constant'})
+
+        # TODO: Consider this case as valid
+        # table_variable = 'table_constant'
+        # self.env.cr.execute("SELECT * FROM %s" % table_variable)
+        # self.env.cr.execute("SELECT * FROM {}".format(table_variable))
+        # self.env.cr.execute("SELECT * FROM %(table_variable)s" % {'table_variable': table_variable})
+
     def func(self, a):
         length = len(a)
         return length
