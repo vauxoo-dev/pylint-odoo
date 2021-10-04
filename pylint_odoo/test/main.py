@@ -19,10 +19,12 @@ EXPECTED_ERRORS = {
     'attribute-deprecated': 3,
     'class-camelcase': 1,
     'consider-merging-classes-inherited': 2,
+    'context-overridden': 3,
     'copy-wo-api-one': 2,
     'create-user-wo-reset-password': 1,
     'dangerous-filter-wo-user': 1,
     'dangerous-view-replace-wo-priority': 6,
+    'dangerous-qweb-replace-wo-priority': 2,
     'deprecated-openerp-xml-node': 5,
     'development-status-allowed': 1,
     'duplicate-id-csv': 2,
@@ -397,6 +399,35 @@ class MainTest(unittest.TestCase):
             real_errors,
             {"po-msgstr-variables": 1, "missing-readme": 1}
         )
+
+    def test_140_check_suppress_migrations(self):
+        """Test migrations path supress checks"""
+        extra_params = [
+            '--disable=all',
+            '--enable=invalid-name,unused-argument',
+        ]
+        path_modules = [os.path.join(
+            os.path.dirname(os.path.dirname(os.path.realpath(__file__))),
+            'test_repo', 'test_module', 'migrations', '10.0.1.0.0', 'pre-migration.py')]
+
+        # Messages suppressed with plugin for migration
+        pylint_res = self.run_pylint(path_modules, extra_params)
+        real_errors = pylint_res.linter.stats['by_msg']
+        expected_errors = {
+            'invalid-name': 1,
+            'unused-argument': 1,
+        }
+        self.assertDictEqual(real_errors, expected_errors)
+
+        # Messages raised without plugin
+        self.default_options.remove('--load-plugins=pylint_odoo')
+        pylint_res = self.run_pylint(path_modules, extra_params)
+        real_errors = pylint_res.linter.stats['by_msg']
+        expected_errors = {
+            'invalid-name': 3,
+            'unused-argument': 2,
+        }
+        self.assertDictEqual(real_errors, expected_errors)
 
 
 if __name__ == '__main__':

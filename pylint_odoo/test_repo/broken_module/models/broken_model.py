@@ -65,6 +65,14 @@ class TestModel(models.Model):
             fields.Datetime.context_timestamp(self,
                                               timestamp=fields.Datetime.now())
         )
+        self.with_context({'overwrite_context': True}).write({})
+        ctx = {'overwrite_context': True}
+        self.with_context(ctx).write({})
+        ctx2 = ctx
+        self.with_context(ctx2).write({})
+
+        self.with_context(**ctx).write({})
+        self.with_context(overwrite_context=False).write({})
         return date
 
     my_ok_field = fields.Float(
@@ -526,6 +534,12 @@ class TestModel(models.Model):
             )
         )
 
+    def sql_no_injection_constants(self):
+        self.env.cr.execute("SELECT * FROM %s" % 'table_constant')
+        self.env.cr.execute("SELECT * FROM {}".format('table_constant'))
+        self.env.cr.execute(
+            "SELECT * FROM %(table_variable)s" % {'table_variable': 'table_constant'})
+
     def func(self, a):
         length = len(a)
         return length
@@ -533,3 +547,13 @@ class TestModel(models.Model):
 
 class NoOdoo(object):
     length = 0
+
+
+if __name__ == '__main__':
+    self = None
+    queries = [
+        "SELECT id FROM res_partner",
+        "SELECT id FROM res_users",
+    ]
+    for query in queries:
+        self.env.cr.execute(query)

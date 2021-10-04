@@ -14,7 +14,23 @@ from lxml import etree
 from pylint.checkers import BaseChecker, BaseTokenChecker
 from pylint.interfaces import UNDEFINED
 from pylint.interfaces import IAstroidChecker, ITokenChecker
-from pylint.utils import _basename_in_blacklist_re
+try:
+    # sha 5805a73 pylint 2.9
+    from pylint.lint.expand_modules import _is_in_ignore_list_re
+except ImportError:
+    try:
+        # sha 63ca0597 pylint 2.8
+        from pylint.lint.expand_modules import (
+            _basename_in_ignore_list_re as _is_in_ignore_list_re)
+    except ImportError:
+        try:
+            # sha d19c77337 pylint 2.7
+            from pylint.utils.utils import (
+                _basename_in_ignore_list_re as _is_in_ignore_list_re)
+        except ImportError:
+            # Compatibility with pylint<=2.6.0
+            from pylint.utils import (
+                _basename_in_blacklist_re as _is_in_ignore_list_re)
 from restructuredtext_lint import lint_file as rst_lint
 from translate.misc import wStringIO
 from translate.storage import po, factory, pypo
@@ -40,7 +56,7 @@ except ImportError:  # isort < 5
 
 DFTL_VALID_ODOO_VERSIONS = [
     '4.2', '5.0', '6.0', '6.1', '7.0', '8.0', '9.0', '10.0', '11.0', '12.0',
-    '13.0', '14.0',
+    '13.0', '14.0', '15.0',
 ]
 DFTL_MANIFEST_VERSION_FORMAT = r"({valid_odoo_versions})\.\d+\.\d+\.\d+$"
 
@@ -204,8 +220,7 @@ class PylintOdooChecker(BaseChecker):
                 fext = os.path.splitext(filename)[1].lower()
                 fname = os.path.join(root, filename)
                 # If the file is within black_list_re is ignored
-                if _basename_in_blacklist_re(fname,
-                                             self.linter.config.black_list_re):
+                if _is_in_ignore_list_re(fname, self.linter.config.black_list_re):
                     continue
                 # If the file is within ignores is ignored
                 find = False

@@ -47,7 +47,6 @@ after_success:
     - coveralls
     - python setup.py sdist  # Build ChangeLog file from git log
 
-<<<<<<< HEAD
 # deploy:
 #   skip_cleanup: true  # Allow to upload Changelog generated from tox
 #   provider: pypi

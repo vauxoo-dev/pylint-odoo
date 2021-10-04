@@ -246,6 +246,12 @@ ODOO_MSGS = {
         'translation-positional-used',
         settings.DESC_DFLT
     ),
+    'W%d21' % settings.BASE_NOMODULE_ID: (
+        'Context overridden using dict. '
+        'Better using kwargs `with_context(**%s)` or `with_context(key=value)`',
+        'context-overridden',
+        settings.DESC_DFLT
+    ),
     'F%d01' % settings.BASE_NOMODULE_ID: (
         'File "%s": "%s" not found.',
         'resource-not-exist',
@@ -468,7 +474,10 @@ class NoModuleChecker(misc.PylintOdooChecker):
         # it's a common pattern of reports (self._select, self._group_by, ...)
         return (isinstance(node, astroid.Attribute)
                 and isinstance(node.expr, astroid.Name)
-                and node.attrname.startswith('_'))
+                and node.attrname.startswith('_')
+                # cr.execute('SELECT * FROM %s' % 'table') is OK
+                # since that is a constant and constant can not be injected
+                or isinstance(node, astroid.Const))
 
     def _is_psycopg2_sql(self, node):
         if isinstance(node, astroid.Name):
@@ -480,7 +489,8 @@ class NoModuleChecker(misc.PylintOdooChecker):
             return False
         imported_name = node.func.as_string().split('.')[0]
         imported_node = node.root().locals.get(imported_name)
-        # TODO: Consider "from psycopg2 import *"?
+        # "from psycopg2 import *" not considered since that it is hard
+        # and there is another check detecting these kind of imports
         if not imported_node:
             return None
         imported_node = imported_node[0]
@@ -505,6 +515,22 @@ class NoModuleChecker(misc.PylintOdooChecker):
                     return True
             elif not self._sqli_allowable(node.right):
                 # execute("..." % self._table)
+                return True
+
+            # Consider cr.execute('SELECT ' + operator + ' FROM table' + 'WHERE')"
+            # node.repr_tree()
+            # BinOp(
+            #    op='+',
+            #    left=BinOp(
+            #       op='+',
+            #       left=BinOp(
+            #          op='+',
+            #          left=Const(value='SELECT '),
+            #          right=Name(name='operator')),
+            #       right=Const(value=' FROM table')),
+            #    right=Const(value='WHERE'))
+            if (not self._sqli_allowable(node.left) and
+                    self._check_node_for_sqli_risk(node.left)):
                 return True
 
         # check execute("...".format(self._table, table=self._table))
@@ -558,12 +584,12 @@ class NoModuleChecker(misc.PylintOdooChecker):
             current = node
             while (current and not isinstance(current.parent, astroid.FunctionDef)):
                 current = current.parent
-            parent = current.parent
-
-            # 2) check how was the variable built
-            for assign_node in parent.nodes_of_class(astroid.Assign):
-                if assign_node.targets[0].as_string() == node.as_string():
-                    yield assign_node.value
+            if current:
+                parent = current.parent
+                # 2) check how was the variable built
+                for assign_node in parent.nodes_of_class(astroid.Assign):
+                    if assign_node.targets[0].as_string() == node.as_string():
+                        yield assign_node.value
 
     @utils.check_messages("print-used")
     def visit_print(self, node):
@@ -578,7 +604,7 @@ class NoModuleChecker(misc.PylintOdooChecker):
                           'translation-required',
                           'translation-contains-variable',
                           'print-used', 'translation-positional-used',
-                          'str-format-used',
+                          'str-format-used', 'context-overridden',
                           )
     def visit_call(self, node):
         infer_node = utils.safe_infer(node.func)
@@ -651,6 +677,15 @@ class NoModuleChecker(misc.PylintOdooChecker):
                 node.func.attrname == 'commit' and \
                 self.get_cursor_name(node.func) in self.config.cursor_expr:
             self.add_message('invalid-commit', node=node)
+
+        if (isinstance(node, astroid.Call) and
+                isinstance(node.func, astroid.Attribute) and
+                node.func.attrname == 'with_context' and
+                not node.keywords and node.args):
+            # with_context(**ctx) is considered a keywords
+            # So, if only one args is received it is overridden
+            self.add_message('context-overridden', node=node,
+                             args=(node.args[0].as_string(),))
 
         # Call the message_post()
         base_dirname = os.path.basename(os.path.normpath(
