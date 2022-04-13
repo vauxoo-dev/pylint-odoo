@@ -296,7 +296,7 @@ DFTL_ATTRIBUTE_DEPRECATED = [
 ]
 DFTL_METHOD_REQUIRED_SUPER = [
     'create', 'write', 'read', 'unlink', 'copy',
-    'setUp', 'setUpClass', 'tearDown', 'default_get',
+    'setUp', 'setUpClass', 'tearDown', 'tearDownClass', 'default_get',
 ]
 DFTL_CURSOR_EXPR = [
     'self.env.cr', 'self._cr',  # new api
@@ -310,7 +310,7 @@ DFTL_ODOO_EXCEPTIONS = [
     'ValidationError', 'Warning',
 ]
 DFTL_NO_MISSING_RETURN = [
-    '__init__', 'setUp', 'setUpClass', 'tearDown', '_register_hook',
+    '__init__', 'setUp', 'setUpClass', 'tearDown', 'tearDownClass', '_register_hook',
 ]
 FIELDS_METHOD = {
     'Many2many': 4,
@@ -468,6 +468,11 @@ class NoModuleChecker(misc.PylintOdooChecker):
         # sql.SQL or sql.Identifier is OK
         if self._is_psycopg2_sql(node):
             return True
+        if isinstance(node, astroid.FormattedValue):
+            if hasattr(node, 'value'):
+                return self._sqli_allowable(node.value)
+            if hasattr(node, 'values'):
+                return all(self._sqli_allowable(v) for v in node.values)
         if isinstance(node, astroid.Call):
             node = node.func
         # self._thing is OK (mostly self._table), self._thing() also because
@@ -547,6 +552,13 @@ class NoModuleChecker(misc.PylintOdooChecker):
                 for keyword in (node.keywords or [])
             ):
                 return True
+
+        # Check fstrings (PEP 498). Only Python >= 3.6
+        if isinstance(node, astroid.JoinedStr):
+            if hasattr(node, 'value'):
+                return self._sqli_allowable(node.value)
+            elif hasattr(node, 'values'):
+                return not all(self._sqli_allowable(v) for v in node.values)
 
         return False
 

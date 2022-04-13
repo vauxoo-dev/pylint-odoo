@@ -1,8 +1,7 @@
-
 import os
 import stat
 import sys
-from tempfile import gettempdir
+from tempfile import gettempdir, NamedTemporaryFile
 import six
 
 import unittest
@@ -160,6 +159,11 @@ class MainTest(unittest.TestCase):
                 res = Run(cmd, do_exit=False)  # pylint2
             except TypeError:
                 res = Run(cmd, exit=False)  # pylint1
+        if not hasattr(res.linter.stats, 'by_msg'):
+            # pylint<2.12 compatibility
+            class stats(object):
+                by_msg = res.linter.stats['by_msg']
+            setattr(res.linter, 'stats', stats)
         return res
 
     def test_10_path_dont_exist(self):
@@ -173,7 +177,7 @@ class MainTest(unittest.TestCase):
     def test_20_expected_errors(self):
         """Expected vs found errors"""
         pylint_res = self.run_pylint(self.paths_modules)
-        real_errors = pylint_res.linter.stats['by_msg']
+        real_errors = pylint_res.linter.stats.by_msg
         self.assertEqual(self.expected_errors, real_errors)
 
     def test_25_checks_without_coverage(self):
@@ -186,7 +190,7 @@ class MainTest(unittest.TestCase):
         }
         extra_params = ['--valid_odoo_versions=8.0']
         pylint_res = self.run_pylint(self.paths_modules, extra_params)
-        msgs_found = pylint_res.linter.stats['by_msg'].keys()
+        msgs_found = pylint_res.linter.stats.by_msg.keys()
         plugin_msgs = set(misc.get_plugin_msgs(pylint_res)) - excluded_msgs
         test_missed_msgs = sorted(list(plugin_msgs - set(msgs_found)))
         self.assertFalse(
@@ -198,7 +202,7 @@ class MainTest(unittest.TestCase):
         """Test disabling checkers"""
         self.default_extra_params.append('--disable=dangerous-filter-wo-user')
         pylint_res = self.run_pylint(self.paths_modules)
-        real_errors = pylint_res.linter.stats['by_msg']
+        real_errors = pylint_res.linter.stats.by_msg
         self.expected_errors.pop('dangerous-filter-wo-user')
         self.assertEqual(self.expected_errors, real_errors)
 
@@ -208,7 +212,7 @@ class MainTest(unittest.TestCase):
                         '--enable=deprecated-module',
                         '--deprecated-modules=openerp.osv']
         pylint_res = self.run_pylint(self.paths_modules, extra_params)
-        real_errors = pylint_res.linter.stats['by_msg']
+        real_errors = pylint_res.linter.stats.by_msg
         self.assertListEqual(list(real_errors.items()),
                              list([('deprecated-module', 4)]))
 
@@ -218,7 +222,7 @@ class MainTest(unittest.TestCase):
                         '--disable=all',
                         '--enable=deprecated-openerp-xml-node']
         pylint_res = self.run_pylint(self.paths_modules, extra_params)
-        real_errors = pylint_res.linter.stats['by_msg']
+        real_errors = pylint_res.linter.stats.by_msg
         self.assertListEqual(list(real_errors.items()),
                              list([('deprecated-openerp-xml-node', 4)]))
 
@@ -229,7 +233,7 @@ class MainTest(unittest.TestCase):
                         '--disable=all',
                         '--enable=deprecated-openerp-xml-node']
         pylint_res = self.run_pylint(self.paths_modules, extra_params)
-        real_errors = pylint_res.linter.stats['by_msg']
+        real_errors = pylint_res.linter.stats.by_msg
         self.assertListEqual(list(real_errors.items()),
                              list([('deprecated-openerp-xml-node', 3)]))
 
@@ -248,7 +252,7 @@ class MainTest(unittest.TestCase):
         my_which("noeslint")
         pylint_res = self.run_pylint(self.paths_modules)
         misc.which = which_original
-        real_errors = pylint_res.linter.stats['by_msg']
+        real_errors = pylint_res.linter.stats.by_msg
         self.expected_errors.pop('javascript-lint')
         self.assertEqual(self.expected_errors, real_errors)
 
@@ -267,7 +271,7 @@ class MainTest(unittest.TestCase):
         misc.which = my_which
         pylint_res = self.run_pylint(self.paths_modules)
         misc.which = which_original
-        real_errors = pylint_res.linter.stats['by_msg']
+        real_errors = pylint_res.linter.stats.by_msg
         self.expected_errors.pop('javascript-lint')
         self.assertEqual(self.expected_errors, real_errors)
 
@@ -281,7 +285,7 @@ class MainTest(unittest.TestCase):
             '--enable=manifest-version-format',
         ]
         pylint_res = self.run_pylint(self.paths_modules, extra_params)
-        real_errors = pylint_res.linter.stats['by_msg']
+        real_errors = pylint_res.linter.stats.by_msg
         expected_errors = {
             'manifest-version-format': 6,
         }
@@ -290,7 +294,7 @@ class MainTest(unittest.TestCase):
         # Now for version 11.0
         extra_params[0] = '--manifest_version_format="11\.0\.\d+\.\d+.\d+$"'
         pylint_res = self.run_pylint(self.paths_modules, extra_params)
-        real_errors = pylint_res.linter.stats['by_msg']
+        real_errors = pylint_res.linter.stats.by_msg
         expected_errors = {
             'manifest-version-format': 5,
         }
@@ -305,7 +309,7 @@ class MainTest(unittest.TestCase):
             '--enable=xml-attribute-translatable,manifest-version-format',
         ]
         pylint_res = self.run_pylint(self.paths_modules, extra_params)
-        real_errors = pylint_res.linter.stats['by_msg']
+        real_errors = pylint_res.linter.stats.by_msg
         expected_errors = {
             'manifest-version-format': 6,
             'xml-attribute-translatable': 1,
@@ -315,7 +319,7 @@ class MainTest(unittest.TestCase):
         # Now for version 11.0
         extra_params[0] = '--valid_odoo_versions=11.0'
         pylint_res = self.run_pylint(self.paths_modules, extra_params)
-        real_errors = pylint_res.linter.stats['by_msg']
+        real_errors = pylint_res.linter.stats.by_msg
         expected_errors = {
             'manifest-version-format': 5,
         }
@@ -331,7 +335,7 @@ class MainTest(unittest.TestCase):
         extra_params = ['--disable=all', '--enable=no-utf8-coding-comment,'
                         'unnecessary-utf8-coding-comment']
         pylint_res = self.run_pylint(modules, extra_params)
-        real_errors = pylint_res.linter.stats['by_msg']
+        real_errors = pylint_res.linter.stats.by_msg
         self.assertListEqual(list(real_errors.items()),
                              list([('unnecessary-utf8-coding-comment', 2)]))
 
@@ -346,7 +350,7 @@ class MainTest(unittest.TestCase):
             '--enable=manifest-required-author',
         ]
         pylint_res = self.run_pylint(self.paths_modules, extra_params)
-        real_errors = pylint_res.linter.stats['by_msg']
+        real_errors = pylint_res.linter.stats.by_msg
         expected_errors = {
             'manifest-required-author': 4,
         }
@@ -355,7 +359,7 @@ class MainTest(unittest.TestCase):
         # Then, run it using multiple authors
         extra_params[0] = '--manifest_required_authors=Vauxoo,Other'
         pylint_res = self.run_pylint(self.paths_modules, extra_params)
-        real_errors = pylint_res.linter.stats['by_msg']
+        real_errors = pylint_res.linter.stats.by_msg
         expected_errors['manifest-required-author'] = 3
         self.assertDictEqual(real_errors, expected_errors)
 
@@ -363,7 +367,7 @@ class MainTest(unittest.TestCase):
         extra_params[0] = ('--manifest_required_author='
                            'Odoo Community Association (OCA)')
         pylint_res = self.run_pylint(self.paths_modules, extra_params)
-        real_errors = pylint_res.linter.stats['by_msg']
+        real_errors = pylint_res.linter.stats.by_msg
         expected_errors_deprecated = {
             'manifest-required-author': (
                 EXPECTED_ERRORS['manifest-required-author']),
@@ -378,13 +382,13 @@ class MainTest(unittest.TestCase):
             '--enable=missing-import-error',
         ]
         pylint_res = self.run_pylint(self.paths_modules, extra_params)
-        real_errors_110 = pylint_res.linter.stats['by_msg']
+        real_errors_110 = pylint_res.linter.stats.by_msg
         self.assertEqual(self.expected_errors.get('missing-import-error'),
                          real_errors_110.get('missing-import-error'))
 
         extra_params[0] = '--valid_odoo_versions=12.0'
         pylint_res = self.run_pylint(self.paths_modules, extra_params)
-        real_errors_120 = pylint_res.linter.stats['by_msg']
+        real_errors_120 = pylint_res.linter.stats.by_msg
         self.assertFalse(real_errors_120)
 
     def test_130_odoo_namespace_repo(self):
@@ -394,7 +398,7 @@ class MainTest(unittest.TestCase):
             '--enable=po-msgstr-variables,missing-readme',
         ]
         pylint_res = self.run_pylint([self.odoo_namespace_addons_path], extra_params)
-        real_errors = pylint_res.linter.stats['by_msg']
+        real_errors = pylint_res.linter.stats.by_msg
         self.assertDictEqual(
             real_errors,
             {"po-msgstr-variables": 1, "missing-readme": 1}
@@ -412,7 +416,7 @@ class MainTest(unittest.TestCase):
 
         # Messages suppressed with plugin for migration
         pylint_res = self.run_pylint(path_modules, extra_params)
-        real_errors = pylint_res.linter.stats['by_msg']
+        real_errors = pylint_res.linter.stats.by_msg
         expected_errors = {
             'invalid-name': 1,
             'unused-argument': 1,
@@ -422,7 +426,7 @@ class MainTest(unittest.TestCase):
         # Messages raised without plugin
         self.default_options.remove('--load-plugins=pylint_odoo')
         pylint_res = self.run_pylint(path_modules, extra_params)
-        real_errors = pylint_res.linter.stats['by_msg']
+        real_errors = pylint_res.linter.stats.by_msg
         expected_errors = {
             'invalid-name': 3,
             'unused-argument': 2,
@@ -443,9 +447,45 @@ class MainTest(unittest.TestCase):
             os.path.join(test_module, '__init__.py'),
             os.path.join(test_module, 'migrations', '10.0.1.0.0', 'pre-migration.py')]
         pylint_res = self.run_pylint(path_modules, extra_params)
-        real_errors = pylint_res.linter.stats['by_msg']
+        real_errors = pylint_res.linter.stats.by_msg
         expected_errors = {}
         self.assertDictEqual(real_errors, expected_errors)
+
+    @unittest.skipUnless(
+        sys.version_info >= (3, 6),
+        "Fstrings (PEP498) are only supported since 3.6"
+    )
+    def test_145_check_fstring_sqli(self):
+        """Verify the linter is capable of finding SQL Injection vulnerabilities
+        when using fstrings.
+        Related to https://github.com/OCA/pylint-odoo/issues/363"""
+        extra_params = [
+            '--disable=all',
+            '--enable=sql-injection'
+        ]
+        queries = '''
+def fstring_sqli(self):
+   self.env.cr.execute(f"SELECT * FROM TABLE WHERE SQLI = {self.table}")
+   self.env.cr.execute(
+       f"SELECT * FROM TABLE WHERE SQLI = {'hello' + self.name}"
+   )
+   self.env.cr.execute(f"SELECT * FROM {self.name} WHERE SQLI = {'hello'}")
+   death_wish = f"SELECT * FROM TABLE WHERE SQLI = {self.name}"
+   self.env.cr.execute(death_wish)
+def fstring_no_sqli(self):
+   self.env.cr.execute(f"SELECT * FROM TABLE WHERE SQLI = {'hello'}")
+   self.env.cr.execute(
+       f"CREATE VIEW {self._table} AS (SELECT * FROM res_partner)"
+   )
+   self.env.cr.execute(f"SELECT NAME FROM res_partner LIMIT 10")
+           '''
+        with NamedTemporaryFile(mode='w') as f:
+            f.write(queries)
+            f.flush()
+            pylint_res = self.run_pylint([f.name], extra_params)
+
+        real_errors = pylint_res.linter.stats.by_msg
+        self.assertDictEqual(real_errors, {'sql-injection': 4})
 
 
 if __name__ == '__main__':
