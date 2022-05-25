@@ -413,7 +413,12 @@ class ModuleChecker(misc.WrapperModuleChecker):
                 and os.path.basename(node.parent.file) == '__init__.py'):
             package_names = []
             if isinstance(node, astroid.ImportFrom):
-                package_names = node.modname.split('.')[:1]
+                if node.modname:
+                    # from .tests import test_file
+                    package_names = node.modname.split('.')[:1]
+                else:
+                    # from . import tests
+                    package_names = [name for name, alias in node.names]
             elif isinstance(node, astroid.Import):
                 package_names = [name[0].split('.')[0] for name in node.names]
             if "tests" in package_names:
@@ -590,10 +595,7 @@ class ModuleChecker(misc.WrapperModuleChecker):
             for entry in po:
                 if entry.obsolete:
                     continue
-                # Using `set` in order to fix false red
-                # if the same entry has duplicated occurrences
-                for occurrence in set(entry.occurrences):
-                    duplicated[(hash(entry.msgid), hash(occurrence))].append(entry)
+                duplicated[hash(entry.msgid)].append(entry)
             for entries in duplicated.values():
                 if len(entries) < 2:
                     continue
