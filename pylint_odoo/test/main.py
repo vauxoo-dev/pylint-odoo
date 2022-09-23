@@ -82,7 +82,7 @@ EXPECTED_ERRORS = {
 }
 
 if six.PY3:
-    EXPECTED_ERRORS['unnecessary-utf8-coding-comment'] = 19
+    EXPECTED_ERRORS['unnecessary-utf8-coding-comment'] = 18
 else:
     EXPECTED_ERRORS['no-utf8-coding-comment'] = 7
 
@@ -487,6 +487,16 @@ def fstring_no_sqli(self):
 
         real_errors = pylint_res.linter.stats.by_msg
         self.assertDictEqual(real_errors, {'sql-injection': 4})
+
+    def test_150_check_only_enabled_one_check(self):
+        """Checking -d all -e ONLY-ONE-CHECK"""
+        disable = '--disable=all'
+        for expected_error_name, expected_error_value in EXPECTED_ERRORS.items():
+            enable = '--enable=%s' % expected_error_name
+            pylint_res = self.run_pylint(self.paths_modules, [disable, enable])
+            real_errors = pylint_res.linter.stats.by_msg
+            expected_errors = {expected_error_name: expected_error_value}
+            self.assertDictEqual(real_errors, expected_errors)
 
 
 if __name__ == '__main__':
