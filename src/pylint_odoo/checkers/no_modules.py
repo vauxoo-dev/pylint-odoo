@@ -600,11 +600,11 @@ class NoModuleChecker(misc.PylintOdooChecker):
                     if assign_node.targets[0].as_string() == node.as_string():
                         yield assign_node.value
 
-    @utils.check_messages("print-used")
+    @utils.only_required_for_messages("print-used")
     def visit_print(self, node):
         self.add_message("print-used", node=node)
 
-    @utils.check_messages('translation-field', 'invalid-commit',
+    @utils.only_required_for_messages('translation-field', 'invalid-commit',
                           'method-compute', 'method-search', 'method-inverse',
                           'sql-injection',
                           'attribute-string-redundant',
@@ -798,7 +798,7 @@ class NoModuleChecker(misc.PylintOdooChecker):
                     'external-request-timeout', node=node,
                     args=(lib_original_func_name,))
 
-    @utils.check_messages(
+    @utils.only_required_for_messages(
         'license-allowed', 'manifest-author-string', 'manifest-deprecated-key',
         'manifest-required-author', 'manifest-required-key',
         'manifest-version-format', 'resource-not-exist',
@@ -899,7 +899,7 @@ class NoModuleChecker(misc.PylintOdooChecker):
             self.add_message('manifest-maintainers-list',
                              node=node)
 
-    @utils.check_messages('method-required-super',
+    @utils.only_required_for_messages('method-required-super',
                           'missing-return',
                           )
     def visit_functiondef(self, node):
@@ -941,14 +941,14 @@ class NoModuleChecker(misc.PylintOdooChecker):
                 node.name not in self.config.no_missing_return:
             self.add_message('missing-return', node=node, args=(node.name))
 
-    @utils.check_messages('external-request-timeout')
+    @utils.only_required_for_messages('external-request-timeout')
     def visit_import(self, node):
         self._from_imports.update({
             alias or name: "%s" % name
             for name, alias in node.names
         })
 
-    @utils.check_messages('openerp-exception-warning', 'external-request-timeout')
+    @utils.only_required_for_messages('openerp-exception-warning', 'external-request-timeout')
     def visit_importfrom(self, node):
         if node.modname == 'openerp.exceptions':
             for (import_name, import_as_name) in node.names:
@@ -958,14 +958,14 @@ class NoModuleChecker(misc.PylintOdooChecker):
             alias or name: "%s.%s" % (node.modname, name)
             for name, alias in node.names})
 
-    @utils.check_messages('class-camelcase')
+    @utils.only_required_for_messages('class-camelcase')
     def visit_classdef(self, node):
         camelized = self.camelize(node.name)
         if camelized != node.name:
             self.add_message('class-camelcase', node=node,
                              args=(camelized, node.name))
 
-    @utils.check_messages('attribute-deprecated')
+    @utils.only_required_for_messages('attribute-deprecated')
     def visit_assign(self, node):
         node_left = node.targets[0]
         if (isinstance(node.parent, astroid.ClassDef) and
@@ -975,7 +975,7 @@ class NoModuleChecker(misc.PylintOdooChecker):
                 self.add_message('attribute-deprecated',
                                  node=node_left, args=(node_left.name,))
 
-    @utils.check_messages('eval-referenced')
+    @utils.only_required_for_messages('eval-referenced')
     def visit_name(self, node):
         """Detect when a "bad" built-in is referenced."""
         node_infer = utils.safe_infer(node)
@@ -1006,7 +1006,7 @@ class NoModuleChecker(misc.PylintOdooChecker):
             return node.expr.name
         return ""
 
-    @utils.check_messages('translation-required')
+    @utils.only_required_for_messages('translation-required')
     def visit_raise(self, node):
         """Visit raise and search methods with a string parameter
         without a method.

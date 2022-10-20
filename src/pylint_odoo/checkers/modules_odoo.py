@@ -78,7 +78,7 @@ class ModuleChecker(misc.WrapperModuleChecker):
 
     class_inherit_names = []
 
-    @utils.check_messages('consider-merging-classes-inherited')
+    @utils.only_required_for_messages('consider-merging-classes-inherited')
     def visit_assign(self, node):
         if not self.odoo_node:
             return
@@ -175,19 +175,19 @@ class ModuleChecker(misc.WrapperModuleChecker):
                 self.add_message('test-folder-imported', node=node,
                                  args=(node.parent.name,))
 
-    @utils.check_messages('odoo-addons-relative-import',
+    @utils.only_required_for_messages('odoo-addons-relative-import',
                           'test-folder-imported')
     def visit_importfrom(self, node):
         self.check_odoo_relative_import(node)
         self.check_folder_test_imported(node)
 
-    @utils.check_messages('odoo-addons-relative-import',
+    @utils.only_required_for_messages('odoo-addons-relative-import',
                           'test-folder-imported')
     def visit_import(self, node):
         self.check_odoo_relative_import(node)
         self.check_folder_test_imported(node)
 
-    @utils.check_messages('except-pass')
+    @utils.only_required_for_messages('except-pass')
     def visit_tryexcept(self, node):
         """Visit block try except"""
         for handler in node.handlers:
