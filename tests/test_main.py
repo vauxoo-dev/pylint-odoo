@@ -257,7 +257,6 @@ def fstring_no_sqli(self):
         real_errors = pylint_res.linter.stats.by_msg
         self.assertDictEqual(real_errors, {'sql-injection': 4})
 
-    @unittest.skip("FIXME")
     def test_150_check_only_enabled_one_check(self):
         """Checking -d all -e ONLY-ONE-CHECK"""
         disable = '--disable=all'
