@@ -5,9 +5,7 @@ import os
 import re
 
 import astroid
-import polib
 from collections import defaultdict
-from lxml import etree
 from pylint.checkers import utils
 
 from .. import misc, settings

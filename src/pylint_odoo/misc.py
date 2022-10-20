@@ -1,20 +1,12 @@
 import ast
-import csv
 import os
 import re
 import string
-import subprocess
-import inspect
 
-from distutils.version import LooseVersion
-from lxml import etree
 from pylint.checkers import BaseChecker, BaseTokenChecker
 from pylint.interfaces import UNDEFINED
 from pylint.interfaces import IAstroidChecker, ITokenChecker
 
-from pylint.lint.expand_modules import _is_in_ignore_list_re
-
-from restructuredtext_lint import lint_file as rst_lint
 
 from . import settings
 
