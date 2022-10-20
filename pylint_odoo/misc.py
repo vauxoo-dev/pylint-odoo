@@ -20,11 +20,6 @@ from six import string_types
 from . import settings
 
 try:
-    from shutil import which  # python3.x
-except ImportError:
-    from whichcraft import which
-
-try:
     import isort.api
 
     HAS_ISORT_5 = True
@@ -67,15 +62,7 @@ def get_plugin_msgs(pylint_run_res):
     msgs_store = pylint_run_res.linter.msgs_store
 
     def get_messages():
-        if hasattr(msgs_store, '_messages'):
-            return pylint_run_res.linter.msgs_store._messages
-        # pylint 2.3.0 renamed _messages to _messages_definitions in:
-        # https://github.com/PyCQA/pylint/commit/75cecdb1b88cc759223e83fd325aeafd09fec37e  # noqa
-        if hasattr(msgs_store, '_messages_definitions'):
-            return pylint_run_res.linter.msgs_store._messages_definitions
-        raise ValueError(  # pragma: no cover
-            'pylint.utils.MessagesStore does not have a '
-            '_messages/_messages_definitions attribute')
+        return pylint_run_res.linter.msgs_store._messages_definitions
 
     messages = get_messages()
 
@@ -148,40 +135,6 @@ class PylintOdooChecker(BaseChecker):
             if os.path.isfile(manifest_file):
                 return manifest_file
 
-    def set_ext_files(self):
-        """Create `self.ext_files` dictionary with {extension_file: [files]}
-            and exclude files using --ignore and --ignore-patterns parameters
-        """
-        self.ext_files = {}
-        for root, _, filenames in os.walk(self.module_path, followlinks=True):
-            for filename in filenames:
-                fext = os.path.splitext(filename)[1].lower()
-                fname = os.path.join(root, filename)
-                # If the file is within black_list_re is ignored
-                if _is_in_ignore_list_re(fname, self.linter.config.black_list_re):
-                    continue
-                # If the file is within ignores is ignored
-                find = False
-                for ignore in self.linter.config.black_list:
-                    if ignore in fname:
-                        find = True
-                        break
-                if not find:
-                    fname_rel = os.path.relpath(fname, self.module_path)
-                    self.ext_files.setdefault(fext, []).append(fname_rel)
-
-    def set_caches(self):
-        self.ext_files = {}
-        if self.is_main_odoo_module:
-            self.set_ext_files()
-
-    def clear_caches(self):
-        self.ext_files = None
-
-    def leave_module(self, node):
-        """Clear caches"""
-        self.clear_caches()
-
     def wrapper_visit_module(self, node):
         """Call methods named with name-key from self.msgs
         Method should be named with next standard:
@@ -224,7 +177,6 @@ class PylintOdooChecker(BaseChecker):
         self.node = node
         self.module_path = os.path.dirname(node.file)
         self.module = os.path.basename(self.module_path)
-        self.set_caches()
         for msg_code, msg_params in sorted(self.msgs.items()):
             name_key = msg_params[1]
             self.msg_code = msg_code
@@ -318,22 +270,7 @@ class WrapperModuleChecker(PylintOdooChecker):
         msgs_store = self.linter.msgs_store
 
         def get_message_definitions(message_id_or_symbol):
-            if hasattr(msgs_store, 'check_message_id'):
-                return [msgs_store.check_message_id(message_id_or_symbol)]
-            # pylint 2.0 renamed check_message_id to get_message_definition in:
-            # https://github.com/PyCQA/pylint/commit/5ccbf9eaa54c0c302c9180bdfb745566c16e416d  # noqa
-            if hasattr(msgs_store, 'get_message_definition'):  # pragma: no cover
-                return \
-                    [msgs_store.get_message_definition(message_id_or_symbol)]
-            # pylint 2.3.0 renamed get_message_definition to get_message_definitions in:  # noqa
-            # https://github.com/PyCQA/pylint/commit/da67a9da682e51844fbc674229ff6619eb9c816a  # noqa
-            if hasattr(msgs_store, 'get_message_definitions'):
-                return \
-                    msgs_store.get_message_definitions(message_id_or_symbol)
-            else:
-                raise ValueError(  # pragma: no cover
-                    'pylint.utils.MessagesStore does not have a '
-                    'get_message_definition(s) method')
+            return msgs_store.get_message_definitions(message_id_or_symbol)
 
         msg = get_message_definitions(msg_code)[0].msg.strip('"\' ')
         if not fmatch or not msg.startswith(r"%s"):
