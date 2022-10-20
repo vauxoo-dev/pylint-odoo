@@ -1,1 +1,517 @@
-# See change log in https://pypi.python.org/pypi/pylint-odoo
+CHANGES
+=======
+
+* update-packages
+* fixup! remove-library-py2
+* remove-library-py2
+* borrar
+* remove-old-osv
+* fixup! cleaned
+* cleaned
+* remove-isort-lxml-docutilr-polib
+* remove-isort-lxml-docutilr-polib
+* cleaning2
+* cleaning1
+* cleaning-code
+* remove-deprecated-deps
+* [IMP] apocalintSYS: Full refactoring
+* fixing
+* Revert "part3"
+* part3
+* part3
+* second-part
+* first-part
+
+7.0.4
+-----
+
+* [REF] translation-positional-used: Consider srt.format('{} {}') cases (#395)
+
+7.0.3
+-----
+
+* [REF] README: Auto-update Using pylint\_odoo.messages2rst()
+* [REF] CI: Comment py3.7 travis with weird error unrelated
+* [ADD] manifest-data-duplicated: Detect duplicated data file
+
+7.0.2
+-----
+
+* [FIX] attribute-string-redundant: Only when field string is the same as title() format (#392)
+
+7.0.1
+-----
+
+* [REF] pylint\_odoo: Update supported Odoo version 16.0 (#391)
+* [REF] CI: Use py3.10 and 3.11 environments for travis (#389)
+* [REF] tests: Add unittest to check only one check enabled (#385)
+
+7.0.0
+-----
+
+* [REF] external-request-timeout: Add ftplib.FTP method (#388)
+* Revert "[PERF] \*: Checkers only run when enabled #372 (#376)" (#386)
+* [PERF] \*: Checkers only run when enabled #372 (#376)
+* [FIX] missing-import-error: add xlrd to whitelist (#379)
+
+6.2.0
+-----
+
+* [IMP] duplicate-po-message-definition: Detecting duplicated only with msgid (#374)
+* [IMP] test-folder-imported: Consider 'from . import test' missing case (#373)
+
+6.1.0
+-----
+
+* [REF] README: Auto-update Using pylint\_odoo.messages2rst()
+* [ADD] external-request-timeout: It could wait for a long time (#370)
+* [FIX] .travis.yml: npm v18.0.0 is not compatible with ubuntu used from travis (#371)
+* [REF] README: Use new travis URL (#369)
+
+6.0.0
+-----
+
+* [ADD] pre-commit-hooks: Add pylint\_odoo hook to be used from pre-commit.yaml directly (#368)
+* [REF] requirements: Bump pylint package from 2.11.1 to 2.13.5 for py3.x (#367)
+* [FIX] CI: Fix pluggy error on py3.7 and running lint only in one build (#366)
+* [IMP] sql-injection: Detect possible sql injections when using f-strings (#364)
+* [FIX] Pinned lazy-object-proxy for Python 2.7 (#365)
+* [FIX] missing-return: Incorrect check for tearDownClass (#362)
+
+5.0.5
+-----
+
+* [FIX] OdooChecker: Discard migrations folder as odoo main module (#358)
+
+5.0.4
+-----
+
+* Revert "[REVERT] requirements: Using pylint<2.11.0 because issue 5096 (#355)"
+
+5.0.3
+-----
+
+* [REVERT] requirements: Using pylint<2.11.0 because issue 5096 (#355)
+
+5.0.2
+-----
+
+* [REF] requirements: Upgrade pylint version 2.11.1 (#354)
+
+5.0.1
+-----
+
+* [REF] manifest-version-format: Add new valid odoo v15.0 (#353)
+* [REF] sql-injection: No sql-injection using constants (#351)
+* [FIX] sql-injection: AttributeError: 'NoneType' object has no attribute 'parent' (#350)
+
+5.0.0
+-----
+
+* [REF] requirements: Upgrade pylint version (#349)
+
+4.0.0
+-----
+
+* [REF] README: Auto-update Using pylint\_odoo.messages2rst()
+* [ADD] dangerous-qweb-replace-wo-priority: Consider qweb view templates (#347)
+* [ADD] context-overridden: Better using kwargs instead of dictionary (#256)
+* [REF] invalid-name, unused-argument: Suppress check for migrations path (#348)
+
+3.10.0
+------
+
+* [FIX] sql-injection: Fix false positives (#344)
+* [FIX] pylint\_odoo: Fix manifest\_version\_format option ignored (#346)
+
+3.9.0
+-----
+
+* [FIX] translation-required: Skip tests folder (#345)
+* [FIX] xml-syntax-error: Fix crash if a xml has syntax errors (#343)
+* [REF] pylint-odoo: Add .pylintrc example (#325)
+* [FIX] attribute-deprecated: Check only "Model" class' attributes (#342)
+* [FIX] attribute-string-redundant: "string" of related field is taken from the referenced one (#341)
+* [FIX] file-not-used: Fix false positives on Windows (#335)
+
+3.8.0
+-----
+
+* [FIX] Add pbr to requirements (#328)
+* [REF] requirements: upgrade pylint version (#320)
+
+3.7.1
+-----
+
+* [FIX] test-folder-imported: Support all import styles (#315)
+* [FIX] misc.py: Properly support python namespace package when detecting the odoo addon directory (#317)
+
+3.7.0
+-----
+
+* [REF] README: Auto-update Using pylint\_odoo.messages2rst()
+* [ADD] translation-positional-used: New check to valid the allow change the order of string formatting (#305)
+* [ADD] str-format-used: Check if str.format was used in translated string (#304)
+* [ADD] test-folder-imported: check if tests folder is imported in init file (#310)
+
+3.6.0
+-----
+
+* [FIX] requirements: fix dependencies break with pip 20.3 Fix #306 (#313)
+* [ADD] add compatibility to v14.0 (#312)
+
+3.5.1
+-----
+
+* [REF] .travis.yml: Enable condition to deploy pypi
+* [REF] README: Auto-update Using pylint\_odoo.messages2rst()
+* [FIX] dangerous-view-replace-wo-priority: check all child tags with replace (#309)
+* [ADD] pylint-odoo: add new check to maintainers key in manifest must be a list of str (#308)
+* [REF] development-status-allowed: Explicitly report possible values (#301)
+* [REF]  odoo-addons-relative-import: does not apply in tests/ directory (#307)
+* [REF] CI: Enable py3.8 and py3.9 (#294)
+
+3.5.0
+-----
+
+* [FIX] messages2rst: Compatible with more than 3 message items
+* [REF] no-utf8-coding-comment,unnecessary-utf8-coding-comment: Using python version to enable/disable them (#292)
+* [REF] po-msgstr-variables: Check if there is missing 'module:' comment (#291)
+
+3.4.0
+-----
+
+* [REF] README: Auto-update Using pylint\_odoo.messages2rst()
+* Fixing pragma: no cover position
+* [ADD] po-msgstr-variables: Check if string translated can be parsed correctly
+* [ADD] duplicate-po-message-definition, po-syntax-error: Enable PO checks
+
+3.3.2
+-----
+
+* [REF] missing-manifest-dependency: Add openupgradelib as a whitelist. (#288)
+* [FIX] sql-injection: Consider valid arguments built with psycopg2.sql
+
+3.3.1
+-----
+
+* [REF] missing-import-error: Add new packages for Odoo v13.0
+
+3.3.0
+-----
+
+* [REF] requirements.txt: Update packages version (#285)
+
+3.2.0
+-----
+
+* [FIX] get\_manifest\_file: Get manifest file correctly
+* [FIX] Visit module: manage odoo subdirectories Better way to check whether a path is a path of a subdirectoy of a Odoo module. Before, '/a/b/cc/d' was considered as a subdirectoy of '/a/b/c' because '/a/b/c' in '/a/b/cc/d' == True
+
+3.1.0
+-----
+
+* [REF] README: Auto-update Using pylint\_odoo.messages2rst()
+* [FIX] rst\_lint: Using UTF-8 encoding by default (#272)
+* [ADD] Possibility of package name include dots
+* [REF] .travis.yml: Using py3.7 stable instead of dev (#271)
+* Improve incoherent-interpreter-exec-perm message
+* Fix incompatibility with isort configuration file
+* [FIX] rst-syntax-error: Using a 0 by default if line None is returned
+
+3.0.3
+-----
+
+* [REF] README: Auto-update Using pylint\_odoo.messages2rst()
+* Revert "[ADD] method-default prefix" (#254)
+
+3.0.2
+-----
+
+* [REF] README: Auto-update Using pylint\_odoo.messages2rst()
+* [REF] CI: Fixing flake8, tests and clean requirements
+* [REF] pylint\_odoo: Supports odoo 13.0
+* [ADD] method-default prefix
+* [FIX] .travis.yml: Upgrade nvm version supported for eslint
+* Allow console statements
+* [ADD] print-used: Use \_logger instead of print (#241)
+
+3.0.1
+-----
+
+* [FIX] AttributeError: 'MessagesStore' object has no attribute '\_messages' related to https://github.com/PyCQA/pylint/commit/75cecdb1b88cc759223e83fd325aeafd09fec37e
+* [IMP] added support Pylint 2.3.0 and Astroid 2.2.0
+
+3.0.0
+-----
+
+* [REF] README: Auto-update Using pylint\_odoo.messages2rst()
+* [REF] sql-injection: Test private attributes (#226)
+* [REF] tox: Upgrade new pylint for py3 (#215)
+
+2.0.2
+-----
+
+* [REF] manifest-required-authors: Support old deprecated parameter
+
+2.0.1
+-----
+
+* [REF] README: Auto-update Using pylint\_odoo.messages2rst()
+* [DEL] require-jsdoc, keep require-valid-jsdoc
+* [FIX]change the location of Guidelines URL
+* [ADD] development-status-allowed: New check to verity valid development status Fix https://github.com/OCA/pylint-odoo/issues/199
+* [REF] missing-import-error: Check enabled just for odoo <= 11.0
+* Add fuzzy to ES globals
+* Allow usage of \`undefined\` (#214)
+* Jslint jsdoc relax (#209)
+* [REF] pylint-odoo: Compatibility with python3.7 (#205)
+* [IMP] file-not-used: Ignore unused files into the migrations directory (#213)
+* [IMP] manifest-required-author: Allow multiple possible required authors
+* [FIX] missing-manifest-dependency: Exclude tests directory
+* [FIX] manifest-version-format: Don't ignore valid Odoo versions
+* [FIX] requirements: Include "six" package (#207)
+
+2.0.0
+-----
+
+* [REF] README: Auto-update Using pylint\_odoo.messages2rst()
+* [DOC] README.rst: Adding documentation to the way to skip one check based on the Odoo Version
+* [REF] requirements: Bump requirements version
+* Add \_register\_hook in "no missing return" methods (#201)
+* [ADD] Add new lint to detect variables within translatable strings (#198)
+* [FIX] translation-required: Fix some false positives (#196)
+* [REF] .travis.yml: Allow both W503 and W504 formats (#197)
+
+1.9.5
+-----
+
+* [REF] .travis.yml: Just deploy a env and avoid cleanup before to deploy
+
+1.9.4
+-----
+
+* [REF] pylint\_odoo: Increase coverage test
+* [FIX] README.rst: Fix syntax and run check
+* [FIX] don't complain about string attribute nodes in translation check
+* [REF] javascript-lint: Allow to use moment (#189)
+* Allow short ternary expressions
+* [IMP] ESLint usability boost (#185)
+* [REF] javascript-lint: Emit a message if there is internal error
+* [REF] jslintrc: Use of property style for dot-location
+* [REF] The method message\_post need the subject and body be translatable
+* [FIX] duplicate-xml-fields: Now consider as duplicated using domain and context values (#172)
+
+1.9.3
+-----
+
+* [REF] pylint\_odoo: Use check-name instead of check-code for add\_message method (#174)
+* [FIX] pylint\_odoo: Change the number of the appearances of the check (#173)
+* [REF] README: Auto-update Using pylint\_odoo.messages2rst()
+* [ADD] unnecessary-utf8-coding-comment: The utf8 comment is unnecessary if the version of odoo is 11.0 because use py3 (#168)
+* [FIX] missing-external-dependency: Skip relative imports that starts with dot (#171)
+* [ADD] character-not-valid-in-resource-link: To valid the character '?/#' into the in src/href link (#163)
+* [REF] javascript-lint: Disable comma-dangle and prefer-rest-params checks
+* [REF] .travis.yml: Freeze flake8 version In order to avoid false red if a new check is added
+* [ADD] Add licence OEEL-1 into licence-allowed for module depending on Enterprise (#165)
+* [ADD] xml-deprecated-qweb-directive: Deprecated QWeb directives (#157)
+* [FIX] Add 11.0 as valid Odoo version
+* [FIX] unicode error removing decode and use bytes with bytes  - Open file with rb and use bytes with bytes  - Use xml\_special\_char.xml: Use a special char to reproduce a decode  error
+
+1.8.2
+-----
+
+* [REF] pylint\_odoo: Support python3
+
+1.8.1
+-----
+
+* [REF] README: Auto-update Using pylint\_odoo.messages2rst()
+* [FIX] deprecated-data-xml-node: Fix false negative with data/record + record for xml nodes (#156)
+* [FIX] disable xml check: get method called when the method is not called directly (#154)
+* [FIX] misc: TypeError argument of type 'NoneType' is not iterable (#150)
+* [FIX] manifest-version-format: Use real dot from regex (#153)
+* [FIX] manifest-version-format: Adds matching for string end to default manifest version format (#155)
+* [ADD] xml-deprecated-tree-attribute: Implements check for deprecated tree attributes (#149)
+* [REF] jslintrc: Disable prefer-spread
+* [IMP] missing-return: Skip missing return if function is a generator (#147)
+* [IMP] missing-return/required-super: setUpClass (#143)
+* [IMP] missing-readme: Check for other supported file names (#140)
+* [REF] jslintrc: Disable prefer-reflect error (#141)
+* [REF] file-not-used: Consider as used the files referenced from report xml files (#138)
+
+1.8.0
+-----
+
+* [REF] README: Auto-update Using pylint\_odoo.messages2rst()
+* [REF] cache: Cache other extension files just if is a odoo module (#142)
+* [IMP] pylint\_odoo: Skip pylint check on one xml file (#135)
+* [ADD] website-manifest-key-not-valid-uri: For validate if the website into manifest is valid URI (#136)
+
+1.7.0
+-----
+
+* [REF] README: Auto-update Using pylint\_odoo.messages2rst()
+* [ADD] pylint\_odoo: Adding new check resource-not-exist (#130)
+* [FIX] fields: Validate a assign directly from root class (#116)
+* [FIX] jslintrc: Remove deprecated ecmaFeatures key
+* [ADD] pylint\_odoo: Adding check detected <data> tag inside <odoo> tag and show warning  (#129)
+* [REF] Fix typo
+* [REF] jslint: Enable no-comma-dangle check
+* [IMP] sql-injection: support new cases and ignore some false positives (#122)
+* [FIX] xml-attribute-translatable: Skip if version is different 8.0 (#117)
+* [FIX] deprecated-module: Consider 'from openerp.osv.expression'
+
+1.6.0
+-----
+
+* [REF] README: Auto-update Using the following script: 'PYTHONPATH=~/odoo/pylint-odoo python -c "import pylint\_odoo;print pylint\_odoo.messages2rst()"'
+* [REF] .travis.yml: Renamed flake8 error from F999 to F601 (#115)
+* [FIX] Check file-not-used: Skip tests folders (#114)
+* [FIX] incoherent-interpreter-exec-perm: Skip check for windows (#113)
+* [ADD] except-pass: Emit message If a except:pass is used (#107)
+* [FIX] attribute-string-redundant: Add "isinstance" validation for nodes
+* [ADD] attribute-string-redundant: Check if "string" parameter is equal to variable name (#100)
+* [ADD] renamed-field-parameter: Detect deprecated field values (digits\_compute, select) (#99)
+* [REF] javascript-lint: Use eslint instead of jshint (#97)
+* [ADD] xml-attribute-translatable: Check XML attribute without translation parameter (#105)
+* [REF] incoherent-interpreter-exec-perm: Better message (#106)
+* [IMP] pylint-odoo: Adding support for parameters --ignore and --ignore-patterns (#103)
+* [ADD] eval-referenced: Detects if a "eval" is referenced (without call it) (#101)
+* [FIX] duplicate-xml-fields: False red using 2 tree sub-views \*2M fields (#96)
+* [FIX] method-NAME: Fix if value is not a string
+* [REF] misc: Remove deprecated method
+* [FIX] test: Never use global into test
+
+1.5.0
+-----
+
+* [REF] duplicate-xml-record-id: Get xml section from manifest to skip different origin (#89)
+* [FIX] method-NAME: Fix case compute=None Fix OCA/pylint-odoo#88
+
+1.4.0
+-----
+
+* [REF] attribute-deprecated: Deprecate length class attribute (#86)
+* [ADD] missing-return If you use call a \`super\` method then you will need return the original value. If you want overwrite a original method then you need add documentation of why and add a \`pylint: disable=missing-return\`
+* [FIX] Whitelist \`anybox.testing.openerp\` \* Add \`anybox.testing.openerp\` - Fixes #81
+* [FIX] manifest-version-format: Fix regex to use explicit dot instead of any char
+* [FIX] manifest-version-format: Support -e manifest-version-format only
+* [FIX] missing-import-error: Updating libraries used from requirements.txt but not imported or nested imported from odoo
+* [IMP] manifest-version-format: Add valid\_odoo\_versions parameter to force a valid version of odoo in the manifest version
+* [REF] missing-import-error: Skip test file since these files are loaded only when running tests and in such a case your module and their external dependencies are installed
+* [ADD] Support for 10.0 manifest name
+* [REF] requirements: Update developer version of pylint and astroid
+
+1.3.5
+-----
+
+* Adding isort dependency (#70)
+
+1.3.4
+-----
+
+* [REF] README: Update messages list
+
+1.3.3
+-----
+
+* [ADD] missing-import-error, missing-manifest-dependency
+* [FIX] rst-syntax-error: Skip unknown roles
+* [FIX] rst-syntax-error: Skip unknown directives
+* [REF] global refactoring: better message output and use real file and line number in non-py files (#62)
+* [REF] README: Add examples special folder
+* [REF] checkers: Skip example folder to check lints
+
+1.3.2
+-----
+
+* [REF] README: Update messages list
+
+1.3.1
+-----
+
+* [ADD] file-not-used: Emit message if there are xml, yml, sql or csv files but It isn't referenced from manifest (#53)
+* [ADD] dangerous-view-replace-wo-priority: Check dangerous view with replace but defined with low priority (#55)
+* [ADD] old-api7-method-defined: Emit message if the method defined have (self, cr, uid) (#52)
+* [ADD] odoo-addons-relative-import (#56)
+* [REF] tox: Freeze stable sha pylint20
+* [FIX] consider-merging-classes-inherited: Skip check if has '\_name' and fix when you use '\_inherit' name out of class attribute . Add more tests
+* [REF] missing-newline-extrafiles: Skip lib folder
+* [FIX] consider-merging-classes-inherited: Fix leaving module isn't a good idea. Better close method
+* [IMP] consider-merging-classes-inherited: Support disable comment
+* [REF] consider-merging-classes-inherited: Use assign node and better message
+* [ADD] consider-merging-classes-inherited
+* [REF] Increase performance
+* [IMP] pylint\_odoo: Enable cProfile print stats
+* [IMP] deprecated-module: Add exception for the case of valid openerp.osv.expression (#40)
+* [IMP] sql-injection: Add compatibility with .format (#44)
+* [REF] translation-required: 100% coverage
+* [IMP] translation-required: Support % strings
+* [IMP] translation-required: Support .format
+* [FIX] translation-required: Fix AttributeError 'Getattr' object has no attribute 'name'
+* [IMP] translation-required: Just check odoo exceptions
+* [FIX] odoolint: Remove unsafe eval and reduce mccabe rate
+
+1.3.0
+-----
+
+* [REF] README: Add new checks (#36)
+* [FIX] duplicate-xml-fields: Support security xml style (#35)
+* [ADD] sql-injection: Add new check to avoid sql injection (#29)
+* [FIX] missing-newline-extrafiles: Fix 'IOError: [Errno 22] Invalid argument' by files of size 2 (#37)
+* [REF] README: Add new checks
+* [ADD] method-param: Check param method starts with "\_param\_" (#33)
+* [FIX] join\_node\_args\_kwargs: AttributeError (#30)
+* [REF] duplicate-id-csv: Better message of error  - Message before: Duplicate id id\_example1 in ir.model.access.csv file  - Message now: security/ir.model.access.csv duplicated id id\_example1
+* [REF] javascript-lint: Ignore /lib/ subfolder
+* [ADD] invalid-commit: Add new check invalid-commit  - Verify the guideline https://github.com/oca/maintainer-tools/blob/master/CONTRIBUTING.md#never-commit-the-transaction
+
+1.2.0
+-----
+
+* [REF] README.rst: Updating new checks
+* [IMP] test: Add tox for multi-environment and add compatiblity with latest version
+* [ADD] translation-required: Add check to required even a translation (#23)
+* [IMP] Add pylint check missing newline in extra extension files
+* [IMP] test: Add tox for multi-environment and add compatiblity with latest version
+* [IMP] Add Check tabs identation instead of four spaces
+* better\_msg
+* merge
+* [REF] test: better way to identify check error expected
+* [IMP] Add check Duplicate field in xml record (#20)
+* [IMP] Add pylint check Redundant module name reference in xml\_id
+* [IMP] pylint\_odoo: Add check duplicate ids in ir.model.access.csv files
+* [IMP] pylint\_odoo: Add check for manifest-version-format
+* [FIX] OCA/MQT#302: Use of astroid version 1.3.8
+
+1.1.0
+-----
+
+* [FIX] setup: Build ChangeLog file
+* [ADD] Add check 'deprecated-openerp-xml-node'
+* [ADD] ChangeLog: Empty file to support auto build
+* [FIX] Change \_fields by \_columns
+* [REF] Fix typo
+* [IMP] Add check 'create-user-without-reset-password'
+* [IMP] Support odoo tag in xml file
+* [REF] Support of 'noupdate' in check 'duplicate-xml-record-id'
+* [REF] setup.cfg: Enable ChangeLog
+* [REF] README: Add new message manifest-author-string
+
+1.0.2
+-----
+
+* check that author is a string
+
+1.0.1
+-----
+
+* [REF] Migrate md to rst
+
+1.0.0
+-----
+
+* [IMP] .travis.yml: Enable auto deploy of pypi package from travis
+* [ADD] pylint\_odoo: Add main package
+* [ADD] .gitignore: Add file gitignore for first commit
