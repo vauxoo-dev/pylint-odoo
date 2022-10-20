@@ -11,23 +11,9 @@ from lxml import etree
 from pylint.checkers import BaseChecker, BaseTokenChecker
 from pylint.interfaces import UNDEFINED
 from pylint.interfaces import IAstroidChecker, ITokenChecker
-try:
-    # sha 5805a73 pylint 2.9
-    from pylint.lint.expand_modules import _is_in_ignore_list_re
-except ImportError:
-    try:
-        # sha 63ca0597 pylint 2.8
-        from pylint.lint.expand_modules import (
-            _basename_in_ignore_list_re as _is_in_ignore_list_re)
-    except ImportError:
-        try:
-            # sha d19c77337 pylint 2.7
-            from pylint.utils.utils import (
-                _basename_in_ignore_list_re as _is_in_ignore_list_re)
-        except ImportError:
-            # Compatibility with pylint<=2.6.0
-            from pylint.utils import (
-                _basename_in_blacklist_re as _is_in_ignore_list_re)
+
+from pylint.lint.expand_modules import _is_in_ignore_list_re
+
 from restructuredtext_lint import lint_file as rst_lint
 from six import string_types
 

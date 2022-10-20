@@ -49,23 +49,6 @@ DFTL_MIN_PRIORITY = 99
 # Files supported from manifest to convert
 # Extracted from openerp/tools/convert.py:def convert_file
 DFLT_EXTFILES_CONVERT = ['csv', 'sql', 'xml', 'yml']
-DFLT_IMPORT_NAME_WHITELIST = [
-    # self-odoo
-    'odoo', 'openerp',
-    # Known external packages of odoo
-    'PIL', 'PyPDF2', 'anybox.testing.openerp', 'argparse', 'babel', 'chardet',
-    'dateutil', 'decorator', 'docutils', 'faces', 'feedparser',
-    'gdata', 'gevent', 'greenlet', 'jcconv', 'jinja2',
-    'ldap', 'lxml', 'mako', 'markupsafe', 'mock', 'odf',
-    'ofxparse', 'openid', 'passlib', 'pkg_resources',
-    'psutil', 'psycogreen', 'psycopg2', 'pyPdf', 'pychart',
-    'pydot', 'pyparsing', 'pytz', 'qrcode', 'reportlab',
-    'requests', 'serial', 'simplejson', 'six', 'suds',
-    'unittest2', 'urllib3', 'usb', 'vatnumber', 'vobject', 'werkzeug',
-    'wsgiref', 'xlrd', 'xlsxwriter', 'xlwt', 'yaml',
-    # OpenUpgrade migration
-    'openupgradelib'
-]
 DFTL_MANIFEST_DATA_KEYS = ['data', 'demo', 'demo_xml', 'init_xml', 'test',
                            'update_xml']
 
@@ -92,13 +75,6 @@ class ModuleChecker(misc.WrapperModuleChecker):
             'default': DFLT_EXTFILES_CONVERT,
             'help': 'List of extension files supported to convert '
                     'from manifest separated by a comma.'
-        }),
-        ('import_name_whitelist', {
-            'type': 'csv',
-            'metavar': '<comma separated values>',
-            'default': DFLT_IMPORT_NAME_WHITELIST,
-            'help': 'List of known import dependencies of odoo,'
-            ' separated by a comma.'
         }),
     )
 
@@ -129,18 +105,9 @@ class ModuleChecker(misc.WrapperModuleChecker):
         node.file = self.linter.current_file
         self.inh_dup.setdefault(key, []).append(node)
 
-    def _build_whitelist_module_patterns(self):
-        known_patterns = []
-        for known_pattern in self.config.import_name_whitelist:
-            pattern = known_pattern.replace('*', '.*').replace('?', '.?')
-            known_patterns.append(re.compile('^' + pattern + '$'))
-        return known_patterns
-
     def open(self):
         """Define variables to use cache"""
         self.inh_dup = {}
-        patterns = self._build_whitelist_module_patterns()
-        self._whitelist_module_patterns = patterns
         super(ModuleChecker, self).open()
 
     def close(self):
@@ -210,42 +177,6 @@ class ModuleChecker(misc.WrapperModuleChecker):
                 self.add_message('test-folder-imported', node=node,
                                  args=(node.parent.name,))
 
-    @staticmethod
-    def _is_absolute_import(node, name):
-        modnode = node.root()
-        importedmodnode = ModuleChecker._get_imported_module(node, name)
-        if importedmodnode and importedmodnode.file and \
-                modnode is not importedmodnode and \
-                importedmodnode.name != name:
-            return True
-        return False
-
-    @staticmethod
-    def _get_imported_module(importnode, modname):
-        try:
-            return importnode.do_import_module(modname)
-        except:
-            pass
-
-    def _is_module_name_in_whitelist(self, module_name):
-        # Try to find most specific placement instruction match (if any)
-        # (from isort place_module() method)
-        parts = module_name.split('.')
-        module_names_to_check = [
-            '.'.join(parts[:first_k])
-            for first_k in range(len(parts), 0, -1)
-        ]
-        # Check if one of the module name is part of the whitelist.
-        # For an module name such as 'anybox.testing.openerp', the
-        # modules names to check will be:
-        # ['anybox.testing.openerp', 'anybox.testing', 'anybox']
-        # Only one of them has to be in the whitelist to be accepted.
-        for module_name_to_check in module_names_to_check:
-            for pattern in self._whitelist_module_patterns:
-                if pattern.match(module_name_to_check):
-                    return True
-        return False
-
     @utils.check_messages('odoo-addons-relative-import',
                           'test-folder-imported')
     def visit_importfrom(self, node):
@@ -266,13 +197,3 @@ class ModuleChecker(misc.WrapperModuleChecker):
                     len(handler.body) == 1 and
                     isinstance(handler.body[0], astroid.node_classes.Pass)):
                 self.add_message('except-pass', node=handler)
-
-    def _check_missing_readme(self):
-        """Check if exists ./README.{rst,md,txt} file
-        :return: If exists return True else False
-        """
-        self.msg_args = (self.config.readme_template_url,)
-        for readme in DFTL_README_FILES:
-            if os.path.isfile(os.path.join(self.module_path, readme)):
-                return True
-        return False
