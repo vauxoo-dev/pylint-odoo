@@ -53,7 +53,7 @@ class MainTest(unittest.TestCase):
             extra_params = self.default_extra_params
         sys.path.extend(paths)
         cmd = self.default_options + extra_params + paths
-        res = Run(cmd, do_exit=False)
+        res = Run(cmd, exit=False)
         return res
 
     def test_10_path_dont_exist(self):
