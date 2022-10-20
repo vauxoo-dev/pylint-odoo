@@ -39,10 +39,5 @@ class FormatChecker(PylintOdooTokenChecker):
                   line_content) in enumerate(tokens):
             if tokenize.COMMENT == tok_type:
                 line_num = start_line_col[0]
-                magic_comment_type = self.get_magic_comment_type(
-                    token_content, line_num)
-                if magic_comment_type != NO_IDENTIFIED:
-                    tokens_identified[magic_comment_type] = [
-                        token_content, line_num]
-                elif self.is_vim_comment(token_content):
+                if self.is_vim_comment(token_content):
                     self.add_message('use-vim-comment', line=line_num)

@@ -49,8 +49,6 @@ DFTL_MIN_PRIORITY = 99
 # Files supported from manifest to convert
 # Extracted from openerp/tools/convert.py:def convert_file
 DFLT_EXTFILES_CONVERT = ['csv', 'sql', 'xml', 'yml']
-DFLT_EXTFILES_TO_LINT = DFLT_EXTFILES_CONVERT + [
-    'po', 'js', 'mako', 'rst', 'md', 'markdown']
 DFLT_IMPORT_NAME_WHITELIST = [
     # self-odoo
     'odoo', 'openerp',
@@ -68,11 +66,6 @@ DFLT_IMPORT_NAME_WHITELIST = [
     # OpenUpgrade migration
     'openupgradelib'
 ]
-DFTL_JSLINTRC = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.realpath(__file__))),
-    'examples', '.jslintrc'
-)
-DFLT_DEPRECATED_TREE_ATTRS = ['colors', 'fonts', 'string']
 DFTL_MANIFEST_DATA_KEYS = ['data', 'demo', 'demo_xml', 'init_xml', 'test',
                            'update_xml']
 
@@ -86,12 +79,6 @@ class ModuleChecker(misc.WrapperModuleChecker):
             'metavar': '<string>',
             'default': DFTL_README_TMPL_URL,
             'help': 'URL of README.rst template file',
-        }),
-        ('extfiles_to_lint', {
-            'type': 'csv',
-            'metavar': '<comma separated values>',
-            'default': DFLT_EXTFILES_TO_LINT,
-            'help': 'List of extension files to check separated by a comma.'
         }),
         ('min-priority', {
             'type': 'int',
@@ -270,9 +257,6 @@ class ModuleChecker(misc.WrapperModuleChecker):
     def visit_import(self, node):
         self.check_odoo_relative_import(node)
         self.check_folder_test_imported(node)
-        for name, _ in node.names:
-            if isinstance(node.scope(), astroid.Module):
-                self._check_imported_packages(node, name)
 
     @utils.check_messages('except-pass')
     def visit_tryexcept(self, node):
