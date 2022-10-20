@@ -6,7 +6,6 @@ import six
 
 import unittest
 from contextlib import contextmanager
-from cProfile import Profile
 
 from pylint.lint import Run
 
@@ -14,12 +13,6 @@ from pylint_odoo import misc
 
 EXPECTED_ERRORS = {'except-pass': 3, 'print-used': 1, 'test-folder-imported': 3, 'use-vim-comment': 1, 'openerp-exception-warning': 3, 'class-camelcase': 1, 'missing-return': 1, 'method-required-super': 8, 'manifest-required-author': 1, 'manifest-required-key': 1, 'manifest-deprecated-key': 1, 'manifest-version-format': 3, 'resource-not-exist': 4, 'manifest-data-duplicated': 1, 'odoo-addons-relative-import': 4, 'attribute-deprecated': 3, 'translation-field': 2, 'method-compute': 1, 'method-search': 1, 'method-inverse': 1, 'attribute-string-redundant': 31, 'context-overridden': 3, 'renamed-field-parameter': 2, 'translation-required': 15, 'translation-contains-variable': 10, 'translation-positional-used': 7, 'invalid-commit': 4, 'sql-injection': 21, 'external-request-timeout': 51, 'eval-referenced': 5, 'manifest-author-string': 1, 'website-manifest-key-not-valid-uri': 1, 'manifest-maintainers-list': 1, 'license-allowed': 1, 'development-status-allowed': 1, 'consider-merging-classes-inherited': 2}
 
-
-@contextmanager
-def profiling(profile):
-    profile.enable()
-    yield
-    profile.disable()
 
 
 class MainTest(unittest.TestCase):
@@ -46,19 +39,12 @@ class MainTest(unittest.TestCase):
             '--disable=all',
             '--enable=odoolint,pointless-statement,trailing-newlines',
         ]
-        self.profile = Profile()
         self.sys_path_origin = list(sys.path)
         self.maxDiff = None
         self.expected_errors = EXPECTED_ERRORS.copy()
 
     def tearDown(self):
         sys.path = list(self.sys_path_origin)
-        test = self._testMethodName
-        prefix = os.path.expanduser(os.environ.get('PYLINT_ODOO_STATS',
-                                    '~/pylint_odoo_cprofile'))
-        fstats = prefix + '_' + test + '.stats'
-        if test != 'test_10_path_dont_exist':
-            self.profile.dump_stats(fstats)
 
     def run_pylint(self, paths, extra_params=None):
         for path in paths:
@@ -68,16 +54,7 @@ class MainTest(unittest.TestCase):
             extra_params = self.default_extra_params
         sys.path.extend(paths)
         cmd = self.default_options + extra_params + paths
-        with profiling(self.profile):
-            try:
-                res = Run(cmd, do_exit=False)  # pylint2
-            except TypeError:
-                res = Run(cmd, exit=False)  # pylint1
-        if not hasattr(res.linter.stats, 'by_msg'):
-            # pylint<2.12 compatibility
-            class stats(object):
-                by_msg = res.linter.stats['by_msg']
-            setattr(res.linter, 'stats', stats)
+        res = Run(cmd, do_exit=False)
         return res
 
     def test_10_path_dont_exist(self):
