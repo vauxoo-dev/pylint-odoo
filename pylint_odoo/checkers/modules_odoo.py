@@ -119,7 +119,6 @@ class ModuleChecker(misc.WrapperModuleChecker):
 
     @utils.check_messages('consider-merging-classes-inherited')
     def visit_assign(self, node):
-        import pdb;pdb.set_trace()
         if not self.odoo_node:
             return
         if not self.linter.is_message_enabled(
