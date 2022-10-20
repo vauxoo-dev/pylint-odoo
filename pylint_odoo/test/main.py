@@ -89,16 +89,6 @@ class MainTest(unittest.TestCase):
             "Checks without test case: {test_missed_msgs}".format(
                 test_missed_msgs=test_missed_msgs))
 
-    def test_40_deprecated_modules(self):
-        """Test deprecated modules"""
-        extra_params = ['--disable=all',
-                        '--enable=deprecated-module',
-                        '--deprecated-modules=openerp.osv']
-        pylint_res = self.run_pylint(self.paths_modules, extra_params)
-        real_errors = pylint_res.linter.stats.by_msg
-        self.assertListEqual(list(real_errors.items()),
-                             list([('deprecated-module', 4)]))
-
     def test_85_valid_odoo_version_format(self):
         """Test --manifest_version_format parameter"""
         # First, run Pylint for version 8.0
