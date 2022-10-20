@@ -613,7 +613,7 @@ class NoModuleChecker(misc.PylintOdooChecker):
                           'translation-required',
                           'translation-contains-variable',
                           'print-used', 'translation-positional-used',
-                          'str-format-used', 'context-overridden',
+                          'context-overridden',
                           'external-request-timeout',
                           )
     def visit_call(self, node):
@@ -747,7 +747,6 @@ class NoModuleChecker(misc.PylintOdooChecker):
                     and isinstance(arg.func, astroid.Attribute)
                     and isinstance(arg.func.expr, astroid.Const)
                     and arg.func.attrname == 'format'):
-                self.add_message('str-format-used', node=node)
                 wrong = arg.as_string()
                 params_as_string = ', '.join([
                     x.as_string()
