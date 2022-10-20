@@ -56,15 +56,15 @@ import ast
 import itertools
 import os
 import re
+from collections import Counter
 
 import astroid
 import rfc3986
-from six import string_types
 from pylint.checkers import utils
 from pylint.interfaces import IAstroidChecker
+from six import string_types
 
-from .. import settings
-from .. import misc
+from .. import misc, settings
 from .modules_odoo import DFTL_MANIFEST_DATA_KEYS
 
 ODOO_MSGS = {
@@ -257,6 +257,11 @@ ODOO_MSGS = {
         'Context overridden using dict. '
         'Better using kwargs `with_context(**%s)` or `with_context(key=value)`',
         'context-overridden',
+        settings.DESC_DFLT
+    ),
+    'W%d25' % settings.BASE_NOMODULE_ID: (
+        'The file "%s" is duplicated %d times from manifest key "%s"',
+        'manifest-data-duplicated',
         settings.DESC_DFLT
     ),
     'F%d01' % settings.BASE_NOMODULE_ID: (
@@ -863,7 +868,7 @@ class NoModuleChecker(misc.PylintOdooChecker):
         'manifest-required-author', 'manifest-required-key',
         'manifest-version-format', 'resource-not-exist',
         'website-manifest-key-not-valid-uri', 'development-status-allowed',
-        'manifest-maintainers-list')
+        'manifest-maintainers-list', 'manifest-data-duplicated')
     def visit_dict(self, node):
         if not os.path.basename(self.linter.current_file) in \
                 settings.MANIFEST_FILES \
@@ -922,9 +927,13 @@ class NoModuleChecker(misc.PylintOdooChecker):
                                    self.config.manifest_version_format_parsed))
 
         # Check if resource exist
+        # Check manifest-data-duplicated
         dirname = os.path.dirname(self.linter.current_file)
         for key in DFTL_MANIFEST_DATA_KEYS:
-            for resource in (manifest_dict.get(key) or []):
+            for resource, coincidences in Counter(manifest_dict.get(key) or []):
+                if coincidences >= 2:
+                    self.add_message('manifest-data-duplicated', node=node,
+                                     args=(resource, coincidences, key))
                 if os.path.isfile(os.path.join(dirname, resource)):
                     continue
                 self.add_message('resource-not-exist', node=node,
