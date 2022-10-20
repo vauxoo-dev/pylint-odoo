@@ -12,7 +12,7 @@ from pylint_odoo import misc
 
 
 EXPECTED_ERRORS = {
-    # 'website-manifest-key-not-valid-uri': 1,
+    'website-manifest-key-not-valid-uri': 1,
     'except-pass': 3, 'print-used': 1, 'test-folder-imported': 3, 'use-vim-comment': 1, 'openerp-exception-warning': 3, 'class-camelcase': 1, 'missing-return': 1, 'method-required-super': 8, 'manifest-required-author': 1, 'manifest-required-key': 1, 'manifest-deprecated-key': 1, 'manifest-version-format': 3, 'resource-not-exist': 4, 'manifest-data-duplicated': 1, 'odoo-addons-relative-import': 8, 'attribute-deprecated': 6, 'translation-field': 4, 'method-compute': 2, 'method-search': 2, 'method-inverse': 2, 'attribute-string-redundant': 62, 'context-overridden': 6, 'renamed-field-parameter': 4, 'translation-required': 30, 'translation-contains-variable': 20, 'translation-positional-used': 14, 'invalid-commit': 8, 'sql-injection': 42, 'external-request-timeout': 102, 'eval-referenced': 5, 'manifest-author-string': 1, 'manifest-maintainers-list': 1, 'license-allowed': 1, 'development-status-allowed': 1, 'consider-merging-classes-inherited': 5}
 
 
