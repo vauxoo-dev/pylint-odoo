@@ -61,13 +61,7 @@ def get_plugin_msgs(pylint_run_res):
     all_plugin_msgs = []
     for key in messages:
         message = messages[key]
-        if hasattr(message, 'checker'):
-            checker_name = message.checker.name
-        elif hasattr(message, 'msgid'):
-            # pylint 2.5.3 renamed message.checker.name (symbol) to message.msgid
-            checker_name = message.msgid
-        else:
-            raise ValueError('Message does not have a checker name')  # pragma: no cover
+        checker_name =  message.msgid
         if checker_name == settings.CFG_SECTION:
             all_plugin_msgs.append(key)
     return all_plugin_msgs
@@ -286,48 +280,3 @@ class WrapperModuleChecker(PylintOdooChecker):
                 else:
                     kwargs[match_items['key']] = var
         return tuple(args) or kwargs
-
-    @staticmethod
-    def parse_printf(main_str, secondary_str):
-        """Compute args and kwargs of main_str to parse secondary_str
-        Using secondary_str%_get_printf_str_args_kwargs(main_str)
-        """
-        printf_args = WrapperModuleChecker._get_printf_str_args_kwargs(main_str)
-        if not printf_args:
-            return
-        try:
-            main_str % printf_args
-        except Exception:  # pragma: no cover
-            # The original source string couldn't be parsed correctly
-            # So return early without error in order to avoid a false error
-            return
-        try:
-            secondary_str % printf_args
-        except Exception as exc:
-            # The translated string couldn't be parsed correctly
-            # with the args and kwargs of the original string
-            # so it is a real error
-            raise StringParseError(repr(exc))
-
-    @staticmethod
-    def parse_format(main_str, secondary_str):
-        """Compute args and kwargs of main_str to parse secondary_str
-        Using secondary_str.format(_get_printf_str_args_kwargs(main_str))
-        """
-        msgid_args, msgid_kwargs = (
-            WrapperModuleChecker._get_format_str_args_kwargs(main_str))
-        if not msgid_args and not msgid_kwargs:
-            return
-        try:
-            main_str.format(*msgid_args, **msgid_kwargs)
-        except Exception:
-            # The original source string couldn't be parsed correctly
-            # So return early without error in order to avoid a false error
-            return
-        try:
-            secondary_str.format(*msgid_args, **msgid_kwargs)
-        except Exception as exc:
-            # The translated string couldn't be parsed correctly
-            # with the args and kwargs of the original string
-            # so it is a real error
-            raise StringParseError(repr(exc))
