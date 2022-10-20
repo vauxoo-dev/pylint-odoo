@@ -60,7 +60,7 @@ class MainTest(unittest.TestCase):
     def test_10_path_dont_exist(self):
         """test if path don't exist"""
         path_unexist = u'/tmp/____unexist______'
-        with self.assertRaisesRegexp(
+        with self.assertRaisesRegex(
                 OSError,
                 r'Path "{path}" not found.$'.format(path=path_unexist)):
             self.run_pylint([path_unexist])
