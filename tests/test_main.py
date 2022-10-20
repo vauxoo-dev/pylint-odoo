@@ -93,7 +93,7 @@ class MainTest(unittest.TestCase):
         """Test --manifest_version_format parameter"""
         # First, run Pylint for version 8.0
         extra_params = [
-            '--manifest_version_format="8\.0\.\d+\.\d+.\d+$"'
+            r'--manifest_version_format="8\.0\.\d+\.\d+.\d+$"'
             '--valid_odoo_versions=""',
             '--disable=all',
             '--enable=manifest-version-format',
@@ -106,7 +106,7 @@ class MainTest(unittest.TestCase):
         self.assertDictEqual(real_errors, expected_errors)
 
         # Now for version 11.0
-        extra_params[0] = '--manifest_version_format="11\.0\.\d+\.\d+.\d+$"'
+        extra_params[0] = r'--manifest_version_format="11\.0\.\d+\.\d+.\d+$"'
         pylint_res = self.run_pylint(self.paths_modules, extra_params)
         real_errors = pylint_res.linter.stats.by_msg
         expected_errors = {
