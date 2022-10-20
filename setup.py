@@ -41,6 +41,5 @@ def generage_long_description():
 
 setup(
     long_description=generage_long_description(),
-    packages=find_packages("pylint_odoo"),
-    package_dir={"": "pylint_odoo"},
+    install_requires=generate_dependencies(),
 )
