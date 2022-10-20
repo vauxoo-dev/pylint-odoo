@@ -26,13 +26,14 @@ class MainTest(unittest.TestCase):
         ]
         path_modules = os.path.join(
             os.path.dirname(os.path.dirname(os.path.realpath(__file__))),
-            'test_repo')
+            "testing", "resources", 'test_repo')
         self.paths_modules = []
-        root, dirs, _ = next(os.walk(path_modules))
-        for path in dirs:
-            self.paths_modules.append(os.path.join(root, path))
+        for root, dirs, _ in os.walk(path_modules):
+            for path in dirs:
+                self.paths_modules.append(os.path.join(root, path))
         self.odoo_namespace_addons_path = os.path.join(
             os.path.dirname(os.path.dirname(os.path.realpath(__file__))),
+            "testing", "resources",
             'test_repo_odoo_namespace', 'odoo')
         self.default_extra_params = [
             '--disable=all',
@@ -180,6 +181,7 @@ class MainTest(unittest.TestCase):
         ]
         path_modules = [os.path.join(
             os.path.dirname(os.path.dirname(os.path.realpath(__file__))),
+            "testing", "resources",
             'test_repo', 'test_module', 'migrations', '10.0.1.0.0', 'pre-migration.py')]
 
         # Messages suppressed with plugin for migration
@@ -210,6 +212,7 @@ class MainTest(unittest.TestCase):
         ]
         test_module = os.path.join(
             os.path.dirname(os.path.dirname(os.path.realpath(__file__))),
+            "testing", "resources",
             'test_repo', 'test_module')
         path_modules = [
             os.path.join(test_module, '__init__.py'),

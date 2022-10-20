@@ -1,4 +1,4 @@
 pbr
 pylint-plugin-utils==0.7
-pylint>=2.13.5,<=2.15.4
+pylint==2.15.4
 rfc3986
