@@ -19,14 +19,6 @@ from six import string_types
 
 from . import settings
 
-try:
-    import isort.api
-
-    HAS_ISORT_5 = True
-except ImportError:  # isort < 5
-    import isort
-
-    HAS_ISORT_5 = False
 
 DFTL_VALID_ODOO_VERSIONS = [
     '4.2', '5.0', '6.0', '6.1', '7.0', '8.0', '9.0', '10.0', '11.0', '12.0',
@@ -190,19 +182,6 @@ class PylintOdooChecker(BaseChecker):
             is_odoo_check = self.is_main_odoo_module and \
                 msg_code[1:3] == str(settings.BASE_OMODULE_ID)
             is_py_check = msg_code[1:3] == str(settings.BASE_PYMODULE_ID)
-            if callable(check_method) and (is_odoo_check or is_py_check):
-                if not check_method():
-                    if not isinstance(self.msg_args, list):
-                        self.msg_args = [self.msg_args]
-                    for msg_args in self.msg_args:
-                        node_file_original = node.file
-                        node_lineno_original = node.lineno
-                        msg_args_extra = self.set_extra_file(node, msg_args,
-                                                             msg_code)
-                        self.add_message(name_key, line=node.lineno, node=node,
-                                         args=msg_args_extra)
-                        node.file = node_file_original
-                        node.lineno = node_lineno_original
 
     def visit_module(self, node):
         self.wrapper_visit_module(node)
@@ -218,23 +197,8 @@ class PylintOdooChecker(BaseChecker):
                 'valid_odoo_versions'].config.valid_odoo_versions
             short_version = (valid_odoo_versions[0] if
                              len(valid_odoo_versions) == 1 else '')
-        if not self._is_version_supported(short_version, msg_id):
-            return
         return super(PylintOdooChecker, self).add_message(
             msg_id, line, node, args, confidence)
-
-    def _is_version_supported(self, version, name_check):
-        if not version or not hasattr(self, 'odoo_check_versions'):
-            return True
-        odoo_check_versions = self.odoo_check_versions.get(name_check, {})
-        if not odoo_check_versions:
-            return True
-        version = LooseVersion(version)
-        min_odoo_version = LooseVersion(odoo_check_versions.get(
-            'min_odoo_version', DFTL_VALID_ODOO_VERSIONS[0]))
-        max_odoo_version = LooseVersion(odoo_check_versions.get(
-            'max_odoo_version', DFTL_VALID_ODOO_VERSIONS[-1]))
-        return min_odoo_version <= version <= max_odoo_version
 
 
 class PylintOdooTokenChecker(BaseTokenChecker, PylintOdooChecker):
@@ -367,23 +331,3 @@ class WrapperModuleChecker(PylintOdooChecker):
             # with the args and kwargs of the original string
             # so it is a real error
             raise StringParseError(repr(exc))
-
-
-class IsortDriver:
-    """
-    A wrapper around isort API that changed between versions 4 and 5.
-    Taken of https://git.io/Jt3dw
-    """
-
-    def __init__(self):
-        if HAS_ISORT_5:
-            self.isort5_config = isort.api.Config()
-        else:
-            self.isort4_obj = isort.SortImports(  # pylint: disable=no-member
-                file_contents=""
-            )
-
-    def place_module(self, package):
-        if HAS_ISORT_5:
-            return isort.api.place_module(package, self.isort5_config)
-        return self.isort4_obj.place_module(package)
