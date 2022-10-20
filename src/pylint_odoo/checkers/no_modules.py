@@ -456,7 +456,7 @@ class NoModuleChecker(misc.PylintOdooChecker):
 
         :Example:
 
-        >>> self.colon_list_to_dict(['colon:list', 'empty_key:'])
+        self.colon_list_to_dict(['colon:list', 'empty_key:'])
         {'colon': 'list', 'empty_key': ''}
         """
         return dict(item.split(":") for item in colon_list)
