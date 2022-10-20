@@ -15,7 +15,6 @@ from pylint.interfaces import IAstroidChecker, ITokenChecker
 from pylint.lint.expand_modules import _is_in_ignore_list_re
 
 from restructuredtext_lint import lint_file as rst_lint
-from six import string_types
 
 from . import settings
 

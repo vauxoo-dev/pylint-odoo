@@ -2,7 +2,6 @@ import os
 import stat
 import sys
 from tempfile import gettempdir, NamedTemporaryFile
-import six
 
 import unittest
 from contextlib import contextmanager
@@ -29,7 +28,7 @@ class MainTest(unittest.TestCase):
             os.path.dirname(os.path.dirname(os.path.realpath(__file__))),
             'test_repo')
         self.paths_modules = []
-        root, dirs, _ = six.next(os.walk(path_modules))
+        root, dirs, _ = next(os.walk(path_modules))
         for path in dirs:
             self.paths_modules.append(os.path.join(root, path))
         self.odoo_namespace_addons_path = os.path.join(

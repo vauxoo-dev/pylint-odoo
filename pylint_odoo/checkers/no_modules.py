@@ -51,6 +51,7 @@ You can use:
 for more info visit pylint doc
 """
 
+import rfc3986
 import ast
 import itertools
 import os
@@ -58,8 +59,6 @@ import re
 from collections import Counter
 
 import astroid
-import rfc3986
-from six import string_types
 from pylint.checkers import utils
 from pylint.interfaces import IAstroidChecker
 
@@ -646,7 +645,7 @@ class NoModuleChecker(misc.PylintOdooChecker):
                     deprecated = self.config.deprecated_field_parameters
                     if argument.arg in ['compute', 'search', 'inverse'] and \
                             isinstance(argument_aux, astroid.Const) and \
-                            isinstance(argument_aux.value, string_types) and \
+                            isinstance(argument_aux.value, str) and \
                             not argument_aux.value.startswith(
                                 '_' + argument.arg + '_'):
                         self.add_message('method-' + argument.arg,
@@ -814,7 +813,7 @@ class NoModuleChecker(misc.PylintOdooChecker):
 
         # Check author is a string
         author = manifest_dict.get('author', '')
-        if not isinstance(author, string_types):
+        if not isinstance(author, str):
             self.add_message('manifest-author-string', node=node)
         else:
             # Check author required
