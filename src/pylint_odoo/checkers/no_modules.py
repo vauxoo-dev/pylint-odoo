@@ -51,7 +51,7 @@ You can use:
 for more info visit pylint doc
 """
 
-import rfc3986
+import validators
 import ast
 import itertools
 import os
@@ -874,16 +874,12 @@ class NoModuleChecker(misc.PylintOdooChecker):
                 self.add_message('resource-not-exist', node=node,
                                  args=(key, resource))
 
-        # # Check if the website is valid URI
-        # website = manifest_dict.get('website', '')
-        # uri = rfc3986.uri_reference(website)
-        # if ((website and ',' not in website) and
-        #         # DeprecationWarning: Please use rfc3986.validators.Validator instead. This method will be eventually removed.
-        #         (not uri.is_valid(require_scheme=True,
-        #                           require_authority=True) or
-        #          uri.scheme not in {"http", "https"})):
-        #     self.add_message('website-manifest-key-not-valid-uri',
-        #                      node=node, args=(website))
+        # Check if the website is valid URI
+        website = manifest_dict.get('website', '')
+        url_is_valid = bool(validators.url(website, public=True))
+        if website and ',' not in website and not url_is_valid:
+            self.add_message('website-manifest-key-not-valid-uri',
+                             node=node, args=(website))
 
         # Check valid development_status values
         dev_status = manifest_dict.get('development_status')
