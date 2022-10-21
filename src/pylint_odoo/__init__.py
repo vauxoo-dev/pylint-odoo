@@ -1,3 +1,4 @@
+__version__ = "7.0.4"
 
 from . import checkers
 from . augmentations.main import apply_augmentations
