@@ -4,6 +4,7 @@ on:
   # but only for the main branch
   push:
     branches:
+      - apocalint-sys-moy
       - main
     tags:
       - 'v*'
