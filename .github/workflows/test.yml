@@ -4,7 +4,8 @@ on:
   # but only for the main branch
   push:
     branches:
-      - main
+      - 'main'
+      - 'fix-win-moy'
     tags:
       - 'v*'
   pull_request:
@@ -46,13 +47,12 @@ jobs:
             os: 'ubuntu-latest'
 
           # windows
-          # TODO: Fix py37+win issue
-          # - name: 'py37-cover (windows)'
-          #   python: '3.7'
-          #   toxpython: 'python3.7'
-          #   python_arch: 'x64'
-          #   tox_env: 'py37,report,codecov'
-          #   os: 'windows-latest'
+          - name: 'py37-cover (windows)'
+            python: '3.7'
+            toxpython: 'python3.7'
+            python_arch: 'x64'
+            tox_env: 'py37,report,codecov'
+            os: 'windows-latest'
           - name: 'py38-cover (windows)'
             python: '3.8'
             toxpython: 'python3.8'
