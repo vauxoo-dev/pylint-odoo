@@ -979,17 +979,9 @@ class OdooAddons(OdooBaseChecker, BaseChecker):
                 # Return tuple for %s and dict for %(varname)s
                 # Check just the following cases "%s %s..."
                 self.add_message("translation-positional-used", node=node, args=(str2translate,))
-
+            
             # prefer-env-translation: recommend to translate a string (_) with self.env._
-            if (
-                isinstance(arg, nodes.Const)
-                and not isinstance(
-                    node.func, nodes.Attribute
-                )  # ensure it's not already called as attribute, e.g: self.env._()
-                and "fields" != self.get_func_lib(node.parent.func)
-                and self._is_instance_method(self.get_enclosing_function(node))
-            ):
-                self.add_message("prefer-env-translation", node=node)
+            self.add_message("prefer-env-translation", node=node)
 
         # SQL Injection
         if self._check_sql_injection_risky(node):
