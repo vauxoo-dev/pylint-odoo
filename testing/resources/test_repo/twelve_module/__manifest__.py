@@ -9,4 +9,14 @@
     'data': [
         'security/ir.model.access.csv',
     ],
+    "assets": {
+        "web.assets_common": [
+            "twelve_module/static/nonexistent.js",
+            "https://shady.cdn.com/somefile.js"
+        ],
+        "web.assets_frontend": [
+            "/twelve_module/hypothetically/good/file.css",
+            ("before", "/web/static/src/css/random.css", "https://bad.idea.com/cool.css"),
+        ]
+    }
 }
