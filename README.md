@@ -227,8 +227,8 @@ Checks valid only for odoo <= 13.0
 
  * manifest-external-assets
 
-    - https://github.com/OCA/pylint-odoo/blob/v9.3.2/testing/resources/test_repo/twelve_module/__manifest__.py#L15 Assets should be distributed with module's source code. More info at https://httptoolkit.com/blog/public-cdn-risks/
-    - https://github.com/OCA/pylint-odoo/blob/v9.3.2/testing/resources/test_repo/twelve_module/__manifest__.py#L19 Assets should be distributed with module's source code. More info at https://httptoolkit.com/blog/public-cdn-risks/
+    - https://github.com/OCA/pylint-odoo/blob/v9.3.2/testing/resources/test_repo/twelve_module/__manifest__.py#L12 Assets should be distributed with module's source code. More info at https://httptoolkit.com/blog/public-cdn-risks/
+    - https://github.com/OCA/pylint-odoo/blob/v9.3.2/testing/resources/test_repo/twelve_module/__manifest__.py#L12 Assets should be distributed with module's source code. More info at https://httptoolkit.com/blog/public-cdn-risks/
 
  * manifest-maintainers-list
 

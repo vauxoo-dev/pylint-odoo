@@ -105,6 +105,7 @@ import string
 import warnings
 from collections import Counter, defaultdict
 from urllib.parse import urlparse
+from collections.abc import Iterable
 
 from astroid import ClassDef, FunctionDef, NodeNG, nodes
 from pylint.checkers import BaseChecker, utils
@@ -1206,29 +1207,34 @@ class OdooAddons(OdooBaseChecker, BaseChecker):
 
         # Check there are no external assets
         if self.linter.is_message_enabled("manifest-external-assets"):
-            assets_node = None
-            for item in node.items:
-                if item[0].value == "assets":
-                    assets_node = item[1]
+            for subitem in self.extract_strings((manifest_dict.get("assets") or {}).values()):
+                if self.is_external_url(subitem):
+                    import pdb;pdb.set_trace()
+                    print(f"subitem {subitem}")
+                    self.add_message("manifest-external-assets", node=manifest_keys_nodes.get("assets") or node)
 
-            # it is important to use the actual astroid.node instead of manifest_dict, otherwise the
-            # errors are not attributed to the proper node.
-            if assets_node:
-                self._check_manifest_external_assets(assets_node)
+    @staticmethod
+    def extract_strings(items):
+        if isinstance(items, str):
+            yield items
+        elif isinstance(items, Iterable):
+            for item in items:
+                yield from OdooAddons.extract_strings(item)
 
-    def _check_manifest_external_assets(self, node):
-        def is_external_url(url):
-            return urlparse(url).scheme
+    @staticmethod
+    def is_external_url(url):
+        return urlparse(url).scheme
 
-        for _, item in node.items:
-            for element in item.elts:
-                if isinstance(element, nodes.Const):
-                    if is_external_url(element.value):
-                        self.add_message("manifest-external-assets", node=element)
-                elif isinstance(element, nodes.Tuple):
-                    for entry in element.elts:
-                        if isinstance(entry, nodes.Const) and is_external_url(entry.value):
-                            self.add_message("manifest-external-assets", node=element)
+    # def _check_manifest_external_assets(self, node):
+    #     for _, item in node.items:
+    #         for element in item.elts:
+    #             if isinstance(element, nodes.Const):
+    #                 if self.is_external_url(element.value):
+    #                     self.add_message("manifest-external-assets", node=element)
+    #             elif isinstance(element, nodes.Tuple):
+    #                 for entry in element.elts:
+    #                     if isinstance(entry, nodes.Const) and self.is_external_url(entry.value):
+    #                         self.add_message("manifest-external-assets", node=element)
 
     def check_deprecated_odoo_method(self, node: NodeNG) -> bool:
         """Verify the given method is not marked as deprecated under the set Odoo versions.
