@@ -10,4 +10,7 @@
     'data': [
         'security/ir.model.access.csv',
     ],
+    'qweb': [
+        'static/src/xml/*.xml',
+    ],
 }

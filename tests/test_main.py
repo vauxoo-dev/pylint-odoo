@@ -39,7 +39,7 @@ EXPECTED_ERRORS = {
     "manifest-author-string": 1,
     "manifest-behind-migrations": 3,
     "manifest-data-duplicated": 1,
-    "manifest-deprecated-key": 1,
+    "manifest-deprecated-key": 2,
     "manifest-external-assets": 3,
     "manifest-maintainers-list": 1,
     "manifest-required-author": 1,

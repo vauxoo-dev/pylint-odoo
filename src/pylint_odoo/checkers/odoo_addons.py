@@ -360,7 +360,7 @@ DFTL_MANIFEST_REQUIRED_KEYS_APP = ["currency", "images", "license", "support"]
 DFTL_ODOO_REQUIRED_FILES = []
 DFTL_ODOO_REQUIRED_FILES_APP = [os.path.join("static", "description", "index.html")]
 DFTL_MANIFEST_REQUIRED_AUTHORS = ["Odoo Community Association (OCA)"]
-DFTL_MANIFEST_DEPRECATED_KEYS = ["description"]
+DFTL_MANIFEST_DEPRECATED_KEYS = ["description", "qweb"]
 DFTL_LICENSE_ALLOWED = [
     "AGPL-3",
     "GPL-2 or any later version",
